@@ -1,3 +1,5 @@
+export type Locale = 'de' | 'en';
+
 export const UNITS = ['ml', 'g', 'piece'] as const;
 export type Unit = (typeof UNITS)[number];
 
