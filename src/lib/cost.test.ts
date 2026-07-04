@@ -42,6 +42,10 @@ function line(over: Partial<PrepLine> & { prep_id: string; amount: number }): Pr
   return { id: `line-${lineSeq}`, ingredient_id: null, component_prep_id: null, ...over };
 }
 
+function makeLib(over: Partial<Library>): Library {
+  return { ingredients: [], preps: [], prepLines: [], recipes: [], recipeLines: [], ...over };
+}
+
 describe('ingredientUnitCost', () => {
   it('divides net price by pack size', () => {
     expect(ingredientUnitCost(ing({ id: 'a', price_net: 10, pack_size: 500 }))).toBe(0.02);
@@ -55,17 +59,17 @@ describe('prepUnitCost', () => {
   const sugar = ing({ id: 'sugar', price_net: 1, pack_size: 1000, unit: 'g' });
 
   it('costs a single-level prep from its lines over its yield', () => {
-    const lib: Library = {
+    const lib = makeLib({
       ingredients: [sugar],
       preps: [prep({ id: 'simple', yield_amount: 1300 })],
       prepLines: [line({ prep_id: 'simple', ingredient_id: 'sugar', amount: 800 })],
-    };
+    });
     expect(prepUnitCost('simple', lib)).toBeCloseTo(0.8 / 1300, 12);
   });
 
   function chainLib(lemonNet: number): Library {
     const lemonIng = ing({ id: 'lemon', price_net: lemonNet, pack_size: 1, unit: 'piece' });
-    return {
+    return makeLib({
       ingredients: [sugar, lemonIng],
       preps: [
         prep({ id: 'lemonJuice', yield_amount: 400 }),
@@ -79,7 +83,7 @@ describe('prepUnitCost', () => {
         line({ prep_id: 'cordial', component_prep_id: 'oleo', amount: 300 }),
         line({ prep_id: 'cordial', component_prep_id: 'lemonJuice', amount: 200 }),
       ],
-    };
+    });
   }
 
   it('resolves a two-level prep chain from leaf ingredient prices', () => {
@@ -102,14 +106,13 @@ describe('prepUnitCost', () => {
   });
 
   it('throws a cycle error on circular references', () => {
-    const lib: Library = {
-      ingredients: [],
+    const lib = makeLib({
       preps: [prep({ id: 'A', yield_amount: 100 }), prep({ id: 'B', yield_amount: 100 })],
       prepLines: [
         line({ prep_id: 'A', component_prep_id: 'B', amount: 50 }),
         line({ prep_id: 'B', component_prep_id: 'A', amount: 50 }),
       ],
-    };
+    });
     expect(() => prepUnitCost('A', lib)).toThrowError(CostError);
     try {
       prepUnitCost('A', lib);
@@ -120,11 +123,10 @@ describe('prepUnitCost', () => {
   });
 
   it('throws a missing error for unknown components', () => {
-    const lib: Library = {
-      ingredients: [],
+    const lib = makeLib({
       preps: [prep({ id: 'A', yield_amount: 100 })],
       prepLines: [line({ prep_id: 'A', ingredient_id: 'ghost', amount: 10 })],
-    };
+    });
     try {
       prepUnitCost('A', lib);
       expect.unreachable('should have thrown');
@@ -132,13 +134,12 @@ describe('prepUnitCost', () => {
       expect(e).toBeInstanceOf(CostError);
       expect((e as CostError).code).toBe('missing');
     }
-    expect(() => prepUnitCost('nope', { ingredients: [], preps: [], prepLines: [] })).toThrowError(CostError);
+    expect(() => prepUnitCost('nope', makeLib({}))).toThrowError(CostError);
   });
 });
 
 describe('wouldCreateCycle', () => {
-  const lib: Library = {
-    ingredients: [],
+  const lib = makeLib({
     preps: [
       prep({ id: 'A', yield_amount: 100 }),
       prep({ id: 'B', yield_amount: 100 }),
@@ -146,7 +147,7 @@ describe('wouldCreateCycle', () => {
     ],
     // B already contains A
     prepLines: [line({ prep_id: 'B', component_prep_id: 'A', amount: 10 })],
-  };
+  });
 
   it('detects that adding B into A would close a loop', () => {
     expect(wouldCreateCycle('A', 'B', lib)).toBe(true);

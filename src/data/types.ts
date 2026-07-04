@@ -49,8 +49,49 @@ export interface Prep extends NewPrep {
   updated_at: string;
 }
 
+export const RECIPE_UNITS = ['ml', 'cl', 'oz', 'dash', 'barspoon', 'g', 'piece'] as const;
+export type RecipeUnit = (typeof RECIPE_UNITS)[number];
+
+export const METHODS = ['shaken', 'stirred', 'built', 'thrown'] as const;
+export type Method = (typeof METHODS)[number];
+
+export interface NewRecipe {
+  name: string;
+  glass: string | null;
+  ice: string | null;
+  method: Method;
+  price_gross: number | null;
+  target_cost_pct_override: number | null;
+  notes: string | null;
+}
+
+export interface Recipe extends NewRecipe {
+  id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NewRecipeLine {
+  ingredient_id: string | null;
+  component_prep_id: string | null;
+  amount: number;
+  unit: RecipeUnit;
+  is_garnish: boolean;
+}
+
+export interface RecipeLine extends NewRecipeLine {
+  id: string;
+  recipe_id: string;
+}
+
+export interface Settings {
+  target_cost_pct: number;
+}
+
 export interface Library {
   ingredients: Ingredient[];
   preps: Prep[];
   prepLines: PrepLine[];
+  recipes: Recipe[];
+  recipeLines: RecipeLine[];
 }

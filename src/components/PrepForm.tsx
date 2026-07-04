@@ -104,7 +104,7 @@ export default function PrepForm({
     const parsedYield = parseDecimal(yieldAmount);
     if (draftLines.length === 0 || parsedYield === null || parsedYield <= 0) return null;
     const hypothetical: Library = {
-      ingredients: library.ingredients,
+      ...library,
       preps: [
         ...library.preps.filter((p) => p.id !== draftId),
         {

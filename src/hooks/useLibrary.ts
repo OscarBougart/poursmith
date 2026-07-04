@@ -20,7 +20,13 @@ export interface UseLibraryResult {
   importIngredients: (rows: NewIngredient[]) => Promise<string | null>;
 }
 
-const EMPTY_LIBRARY: Library = { ingredients: [], preps: [], prepLines: [] };
+const EMPTY_LIBRARY: Library = {
+  ingredients: [],
+  preps: [],
+  prepLines: [],
+  recipes: [],
+  recipeLines: [],
+};
 
 /** Preps that directly use the given ingredient. */
 export function ingredientUsedBy(id: string, lib: Library): Prep[] {
@@ -59,6 +65,8 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
         ingredients: ingredients.data ?? [],
         preps: preps.data ?? [],
         prepLines: prepLines.data ?? [],
+        recipes: [],
+        recipeLines: [],
       });
     }
     setLoading(false);
