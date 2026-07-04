@@ -23,7 +23,7 @@
 ## File map
 
 ```
-supabase/schema.sql, supabase/seed.sql          Task 1
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    .sql, supabase/seed.sql          Task 1
 tsconfig.app.json, vite.config.ts, package.json Task 2 (strict, @ alias, vitest)
 src/data/types.ts                               Task 2
 src/lib/parse.ts (+ test)                       Task 3
