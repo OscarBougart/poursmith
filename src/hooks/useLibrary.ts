@@ -1,9 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Library, NewIngredient, NewPrep, NewPrepLine, Prep } from '@/data/types';
+import type {
+  Library,
+  NewIngredient,
+  NewPrep,
+  NewPrepLine,
+  NewRecipe,
+  NewRecipeLine,
+  Prep,
+  Recipe,
+} from '@/data/types';
 import { supabase } from '@/lib/supabase';
 
 export interface PrepInput extends NewPrep {
   lines: NewPrepLine[];
+}
+
+export interface RecipeInput extends NewRecipe {
+  lines: NewRecipeLine[];
 }
 
 export interface UseLibraryResult {
@@ -18,6 +31,10 @@ export interface UseLibraryResult {
   updatePrep: (id: string, v: PrepInput) => Promise<string | null>;
   deletePrep: (id: string) => Promise<string | null>;
   importIngredients: (rows: NewIngredient[]) => Promise<string | null>;
+  addRecipe: (v: RecipeInput) => Promise<string | null>;
+  updateRecipe: (id: string, v: RecipeInput) => Promise<string | null>;
+  deleteRecipe: (id: string) => Promise<string | null>;
+  duplicateRecipe: (id: string, newName: string) => Promise<string | null>;
 }
 
 const EMPTY_LIBRARY: Library = {
@@ -44,6 +61,22 @@ export function prepUsedBy(id: string, lib: Library): Prep[] {
   return lib.preps.filter((p) => prepIds.has(p.id));
 }
 
+/** Recipes that directly use the given ingredient. */
+export function ingredientUsedByRecipes(id: string, lib: Library): Recipe[] {
+  const recipeIds = new Set(
+    lib.recipeLines.filter((l) => l.ingredient_id === id).map((l) => l.recipe_id),
+  );
+  return lib.recipes.filter((r) => recipeIds.has(r.id));
+}
+
+/** Recipes that directly use the given prep. */
+export function prepUsedByRecipes(id: string, lib: Library): Recipe[] {
+  const recipeIds = new Set(
+    lib.recipeLines.filter((l) => l.component_prep_id === id).map((l) => l.recipe_id),
+  );
+  return lib.recipes.filter((r) => recipeIds.has(r.id));
+}
+
 export function useLibrary(enabled: boolean): UseLibraryResult {
   const [library, setLibrary] = useState<Library>(EMPTY_LIBRARY);
   const [loading, setLoading] = useState(enabled);
@@ -51,12 +84,15 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
 
   const refresh = useCallback(async () => {
     if (!enabled) return;
-    const [ingredients, preps, prepLines] = await Promise.all([
+    const [ingredients, preps, prepLines, recipes, recipeLines] = await Promise.all([
       supabase.from('ingredients').select('*').order('name'),
       supabase.from('preps').select('*').order('name'),
       supabase.from('prep_lines').select('*'),
+      supabase.from('recipes').select('*').order('name'),
+      supabase.from('recipe_lines').select('*'),
     ]);
-    const firstError = ingredients.error ?? preps.error ?? prepLines.error;
+    const firstError =
+      ingredients.error ?? preps.error ?? prepLines.error ?? recipes.error ?? recipeLines.error;
     if (firstError) {
       setError(firstError.message);
     } else {
@@ -65,8 +101,8 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
         ingredients: ingredients.data ?? [],
         preps: preps.data ?? [],
         prepLines: prepLines.data ?? [],
-        recipes: [],
-        recipeLines: [],
+        recipes: recipes.data ?? [],
+        recipeLines: recipeLines.data ?? [],
       });
     }
     setLoading(false);
@@ -163,6 +199,68 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
     [run],
   );
 
+  const addRecipe = useCallback(
+    ({ lines, ...recipe }: RecipeInput) =>
+      run(async () => {
+        const { data, error: e } = await supabase.from('recipes').insert(recipe).select('id').single();
+        if (e) return e.message;
+        const withRecipeId = lines.map((l) => ({ ...l, recipe_id: (data as { id: string }).id }));
+        const { error: lineError } = await supabase.from('recipe_lines').insert(withRecipeId);
+        return lineError ? lineError.message : null;
+      }),
+    [run],
+  );
+
+  const updateRecipe = useCallback(
+    (id: string, { lines, ...recipe }: RecipeInput) =>
+      run(async () => {
+        const { error: e } = await supabase.from('recipes').update(recipe).eq('id', id);
+        if (e) return e.message;
+        const { error: deleteError } = await supabase.from('recipe_lines').delete().eq('recipe_id', id);
+        if (deleteError) return deleteError.message;
+        const withRecipeId = lines.map((l) => ({ ...l, recipe_id: id }));
+        const { error: lineError } = await supabase.from('recipe_lines').insert(withRecipeId);
+        return lineError ? lineError.message : null;
+      }),
+    [run],
+  );
+
+  const deleteRecipe = useCallback(
+    (id: string) =>
+      run(async () => {
+        const { error: lineError } = await supabase.from('recipe_lines').delete().eq('recipe_id', id);
+        if (lineError) return lineError.message;
+        const { error: e } = await supabase.from('recipes').delete().eq('id', id);
+        return e ? e.message : null;
+      }),
+    [run],
+  );
+
+  const duplicateRecipe = useCallback(
+    (id: string, newName: string) =>
+      run(async () => {
+        const source = library.recipes.find((r) => r.id === id);
+        if (!source) return 'recipe not found';
+        const { id: _id, created_at: _c, updated_at: _u, ...fields } = source;
+        const { data, error: e } = await supabase
+          .from('recipes')
+          .insert({ ...fields, name: newName })
+          .select('id')
+          .single();
+        if (e) return e.message;
+        const copies = library.recipeLines
+          .filter((l) => l.recipe_id === id)
+          .map(({ id: _lid, recipe_id: _rid, ...line }) => ({
+            ...line,
+            recipe_id: (data as { id: string }).id,
+          }));
+        if (copies.length === 0) return null;
+        const { error: lineError } = await supabase.from('recipe_lines').insert(copies);
+        return lineError ? lineError.message : null;
+      }),
+    [run, library],
+  );
+
   return {
     library,
     loading,
@@ -175,5 +273,9 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
     updatePrep,
     deletePrep,
     importIngredients,
+    addRecipe,
+    updateRecipe,
+    deleteRecipe,
+    duplicateRecipe,
   };
 }
