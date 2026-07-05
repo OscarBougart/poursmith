@@ -2,10 +2,11 @@ import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Library, Locale, Menu, Settings } from '@/data/types';
 import { formatEur, formatPercent } from '@/lib/format';
-import type { MenuSortKey, RagFlag } from '@/lib/menuAnalytics';
+import type { MenuSortKey } from '@/lib/menuAnalytics';
 import { menuAnalytics, sortMenuRows, worstOffenderName } from '@/lib/menuAnalytics';
 import { useLocale, useT } from '@/i18n';
 import { ICON_BUTTON, ICON_BUTTON_DANGER } from '@/components/buttonStyles';
+import { FLAG_DOT, FLAG_ROW_TINT, FLAG_TEXT } from '@/components/flagColors';
 
 export interface MenuDetailProps {
   menu: Menu;
@@ -18,13 +19,6 @@ export interface MenuDetailProps {
   onExportInternal: () => void;
   onExportCsv: () => void;
 }
-
-const FLAG_DOT: Record<RagFlag, string> = {
-  green: 'bg-success',
-  amber: 'bg-warning',
-  red: 'bg-danger',
-  unpriced: 'bg-zinc-600',
-};
 
 export default function MenuDetail({
   menu,
@@ -166,7 +160,7 @@ export default function MenuDetail({
                 const itemId = itemByRecipe.get(row.recipe.id);
                 const canReorder = sortKey === 'order';
                 return (
-                  <tr key={row.recipe.id} className="bg-zinc-950/40">
+                  <tr key={row.recipe.id} className={FLAG_ROW_TINT[row.flag] || 'bg-zinc-950/40'}>
                     <td className="px-2 py-3">
                       <span className={`inline-block h-3 w-3 rounded-full ${FLAG_DOT[row.flag]}`} aria-label={row.flag} />
                     </td>
@@ -175,7 +169,7 @@ export default function MenuDetail({
                       {row.priceGross !== null ? formatEur(row.priceGross, locale) : t('menu.unpriced')}
                     </td>
                     <td className="px-4 py-3 text-positive">{formatEur(row.pourCost, locale)}</td>
-                    <td className="px-4 py-3 text-zinc-300">
+                    <td className={`px-4 py-3 font-medium ${FLAG_TEXT[row.flag]}`}>
                       {row.costPct !== null ? formatPercent(row.costPct, locale) : '—'}
                     </td>
                     <td className="px-4 py-3 text-zinc-300">

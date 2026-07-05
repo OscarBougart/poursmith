@@ -5,6 +5,7 @@ import { METHODS } from '@/data/types';
 import { GLASSES, ICE_TYPES } from '@/data/barLists';
 import { componentName, componentNativeUnit, decodeComponent } from '@/lib/component';
 import { costPct, effectiveTargetPct, grossMarginEur, suggestedPriceGross } from '@/lib/pricing';
+import { ragFlag } from '@/lib/menuAnalytics';
 import { parseDecimal } from '@/lib/parse';
 import { recipePourCost } from '@/lib/recipeCost';
 import { unitCompatible } from '@/lib/units';
@@ -293,7 +294,10 @@ export default function RecipeForm({
         onAdd={drafts.add}
       />
 
-      <CostPreview preview={preview} />
+      <CostPreview
+        preview={preview}
+        flag={preview ? ragFlag(preview.pct, effectiveTargetPct(parsedOverride, settings)) : undefined}
+      />
 
       <FormActions
         pending={pending}
