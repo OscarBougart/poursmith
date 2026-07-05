@@ -26,6 +26,7 @@ export interface RecipeFormProps {
   initial: Recipe | null;
   library: Library;
   settings: Settings;
+  usedByNames: string[];
   onSubmit: (v: RecipeInput) => Promise<string | null>;
   onDelete: (() => Promise<string | null>) | null;
   onClose: () => void;
@@ -81,6 +82,7 @@ export default function RecipeForm({
   initial,
   library,
   settings,
+  usedByNames,
   onSubmit,
   onDelete,
   onClose,
@@ -100,6 +102,8 @@ export default function RecipeForm({
     initial?.target_cost_pct_override != null ? String(initial.target_cost_pct_override) : '',
   );
   const [notes, setNotes] = useState(initial?.notes ?? '');
+  const [descriptionDe, setDescriptionDe] = useState(initial?.description_de ?? '');
+  const [descriptionEn, setDescriptionEn] = useState(initial?.description_en ?? '');
   const [lines, setLines] = useState<LineDraft[]>(() =>
     initial
       ? library.recipeLines
@@ -122,6 +126,7 @@ export default function RecipeForm({
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [blockedByUse, setBlockedByUse] = useState(false);
 
   function updateLine(key: number, patch: Partial<LineDraft>): void {
     setLines((prev) => prev.map((l) => (l.key === key ? { ...l, ...patch } : l)));
@@ -277,8 +282,8 @@ export default function RecipeForm({
       price_gross: parsedPrice,
       target_cost_pct_override: parsedOverride,
       notes: notes.trim() === '' ? null : notes.trim(),
-      description_de: null,
-      description_en: null,
+      description_de: descriptionDe.trim() === '' ? null : descriptionDe.trim(),
+      description_en: descriptionEn.trim() === '' ? null : descriptionEn.trim(),
       lines: newLines,
     });
     setPending(false);
@@ -346,6 +351,15 @@ export default function RecipeForm({
       <Field label={t('common.notes')} htmlFor="rec-notes">
         <textarea id="rec-notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={INPUT_CLASS} />
       </Field>
+
+      <div className="grid grid-cols-2 gap-4">
+        <Field label={t('recipe.descriptionDe')} htmlFor="rec-desc-de">
+          <textarea id="rec-desc-de" value={descriptionDe} onChange={(e) => setDescriptionDe(e.target.value)} rows={2} className={INPUT_CLASS} />
+        </Field>
+        <Field label={t('recipe.descriptionEn')} htmlFor="rec-desc-en">
+          <textarea id="rec-desc-en" value={descriptionEn} onChange={(e) => setDescriptionEn(e.target.value)} rows={2} className={INPUT_CLASS} />
+        </Field>
+      </div>
 
       <fieldset className="mb-4">
         <legend className="mb-2 block text-sm text-zinc-400">{t('prep.components')}</legend>
@@ -455,12 +469,18 @@ export default function RecipeForm({
         </dd>
       </dl>
 
+      {blockedByUse && (
+        <p role="alert" className="mb-4 rounded-lg bg-amber-950/60 px-3 py-2 text-sm text-amber-300">
+          {t('menu.inUse', { names: usedByNames.join(', ') })}
+        </p>
+      )}
+
       <div className="mt-6 flex items-center justify-between gap-3">
         {initial && onDelete ? (
           <button
             type="button"
             disabled={pending}
-            onClick={() => setConfirming(true)}
+            onClick={() => (usedByNames.length > 0 ? setBlockedByUse(true) : setConfirming(true))}
             className="rounded-lg border border-red-900 px-4 py-2 text-sm text-red-400 transition hover:bg-red-950/50"
           >
             {t('common.delete')}

@@ -5,6 +5,7 @@ import { formatEur } from '@/lib/format';
 import { costPct, effectiveTargetPct, grossMarginEur, suggestedPriceGross } from '@/lib/pricing';
 import { recipePourCost } from '@/lib/recipeCost';
 import type { RecipeInput } from '@/hooks/useLibrary';
+import { recipeUsedByMenus } from '@/hooks/useLibrary';
 import { useLocale, useT } from '@/i18n';
 import RecipeForm from '@/components/RecipeForm';
 import SlideOver from '@/components/SlideOver';
@@ -160,6 +161,7 @@ export default function RecipesTab({
             initial={current}
             library={library}
             settings={settings}
+            usedByNames={current ? recipeUsedByMenus(current.id, library).map((m) => m.name) : []}
             onSubmit={(v) => (current ? onUpdate(current.id, v) : onAdd(v))}
             onDelete={current ? () => onDelete(current.id) : null}
             onClose={() => setEditing({ mode: 'closed' })}
