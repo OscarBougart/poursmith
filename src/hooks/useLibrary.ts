@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type {
   Library,
+  Menu,
   NewIngredient,
   NewPrep,
   NewPrepLine,
@@ -35,6 +36,12 @@ export interface UseLibraryResult {
   updateRecipe: (id: string, v: RecipeInput) => Promise<string | null>;
   deleteRecipe: (id: string) => Promise<string | null>;
   duplicateRecipe: (id: string, newName: string) => Promise<string | null>;
+  addMenu: (name: string) => Promise<string | null>;
+  renameMenu: (id: string, name: string) => Promise<string | null>;
+  deleteMenu: (id: string) => Promise<string | null>;
+  addMenuItem: (menuId: string, recipeId: string) => Promise<string | null>;
+  removeMenuItem: (id: string) => Promise<string | null>;
+  reorderMenuItem: (id: string, direction: 'up' | 'down') => Promise<string | null>;
 }
 
 const EMPTY_LIBRARY: Library = {
@@ -79,6 +86,14 @@ export function prepUsedByRecipes(id: string, lib: Library): Recipe[] {
   return lib.recipes.filter((r) => recipeIds.has(r.id));
 }
 
+/** Menus that contain the given recipe. */
+export function recipeUsedByMenus(id: string, lib: Library): Menu[] {
+  const menuIds = new Set(
+    lib.menuItems.filter((i) => i.recipe_id === id).map((i) => i.menu_id),
+  );
+  return lib.menus.filter((m) => menuIds.has(m.id));
+}
+
 export function useLibrary(enabled: boolean): UseLibraryResult {
   const [library, setLibrary] = useState<Library>(EMPTY_LIBRARY);
   const [loading, setLoading] = useState(enabled);
@@ -86,15 +101,24 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
 
   const refresh = useCallback(async () => {
     if (!enabled) return;
-    const [ingredients, preps, prepLines, recipes, recipeLines] = await Promise.all([
-      supabase.from('ingredients').select('*').order('name'),
-      supabase.from('preps').select('*').order('name'),
-      supabase.from('prep_lines').select('*'),
-      supabase.from('recipes').select('*').order('name'),
-      supabase.from('recipe_lines').select('*'),
-    ]);
+    const [ingredients, preps, prepLines, recipes, recipeLines, menus, menuItems] =
+      await Promise.all([
+        supabase.from('ingredients').select('*').order('name'),
+        supabase.from('preps').select('*').order('name'),
+        supabase.from('prep_lines').select('*'),
+        supabase.from('recipes').select('*').order('name'),
+        supabase.from('recipe_lines').select('*'),
+        supabase.from('menus').select('*').order('name'),
+        supabase.from('menu_items').select('*'),
+      ]);
     const firstError =
-      ingredients.error ?? preps.error ?? prepLines.error ?? recipes.error ?? recipeLines.error;
+      ingredients.error ??
+      preps.error ??
+      prepLines.error ??
+      recipes.error ??
+      recipeLines.error ??
+      menus.error ??
+      menuItems.error;
     if (firstError) {
       setError(firstError.message);
     } else {
@@ -105,8 +129,8 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
         prepLines: prepLines.data ?? [],
         recipes: recipes.data ?? [],
         recipeLines: recipeLines.data ?? [],
-        menus: [],
-        menuItems: [],
+        menus: menus.data ?? [],
+        menuItems: menuItems.data ?? [],
       });
     }
     setLoading(false);
@@ -265,6 +289,83 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
     [run, library],
   );
 
+  const addMenu = useCallback(
+    (name: string) =>
+      run(async () => {
+        const { error: e } = await supabase.from('menus').insert({ name });
+        return e ? e.message : null;
+      }),
+    [run],
+  );
+
+  const renameMenu = useCallback(
+    (id: string, name: string) =>
+      run(async () => {
+        const { error: e } = await supabase.from('menus').update({ name }).eq('id', id);
+        return e ? e.message : null;
+      }),
+    [run],
+  );
+
+  const deleteMenu = useCallback(
+    (id: string) =>
+      run(async () => {
+        const { error: itemError } = await supabase.from('menu_items').delete().eq('menu_id', id);
+        if (itemError) return itemError.message;
+        const { error: e } = await supabase.from('menus').delete().eq('id', id);
+        return e ? e.message : null;
+      }),
+    [run],
+  );
+
+  const addMenuItem = useCallback(
+    (menuId: string, recipeId: string) =>
+      run(async () => {
+        const existing = library.menuItems.filter((i) => i.menu_id === menuId);
+        const nextOrder = existing.reduce((max, i) => Math.max(max, i.sort_order), -1) + 1;
+        const { error: e } = await supabase
+          .from('menu_items')
+          .insert({ menu_id: menuId, recipe_id: recipeId, sort_order: nextOrder });
+        return e ? e.message : null;
+      }),
+    [run, library],
+  );
+
+  const removeMenuItem = useCallback(
+    (id: string) =>
+      run(async () => {
+        const { error: e } = await supabase.from('menu_items').delete().eq('id', id);
+        return e ? e.message : null;
+      }),
+    [run],
+  );
+
+  const reorderMenuItem = useCallback(
+    (id: string, direction: 'up' | 'down') =>
+      run(async () => {
+        const item = library.menuItems.find((i) => i.id === id);
+        if (!item) return 'menu item not found';
+        const siblings = library.menuItems
+          .filter((i) => i.menu_id === item.menu_id)
+          .sort((a, b) => a.sort_order - b.sort_order);
+        const index = siblings.findIndex((i) => i.id === id);
+        const neighbourIndex = direction === 'up' ? index - 1 : index + 1;
+        const neighbour = siblings[neighbourIndex];
+        if (!neighbour) return null; // already at an edge
+        const first = await supabase
+          .from('menu_items')
+          .update({ sort_order: neighbour.sort_order })
+          .eq('id', item.id);
+        if (first.error) return first.error.message;
+        const second = await supabase
+          .from('menu_items')
+          .update({ sort_order: item.sort_order })
+          .eq('id', neighbour.id);
+        return second.error ? second.error.message : null;
+      }),
+    [run, library],
+  );
+
   return {
     library,
     loading,
@@ -281,5 +382,11 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
     updateRecipe,
     deleteRecipe,
     duplicateRecipe,
+    addMenu,
+    renameMenu,
+    deleteMenu,
+    addMenuItem,
+    removeMenuItem,
+    reorderMenuItem,
   };
 }
