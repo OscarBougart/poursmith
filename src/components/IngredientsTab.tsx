@@ -4,7 +4,7 @@ import type { Category, Ingredient, Library, NewIngredient } from '@/data/types'
 import { CATEGORIES } from '@/data/types';
 import { ingredientUnitCost } from '@/lib/cost';
 import { formatEur, formatNumber, formatPerUnit } from '@/lib/format';
-import { ingredientUsedBy } from '@/hooks/useLibrary';
+import { ingredientUsedBy, ingredientUsedByRecipes } from '@/hooks/useLibrary';
 import { useLocale, useT } from '@/i18n';
 import IngredientForm from '@/components/IngredientForm';
 import SlideOver from '@/components/SlideOver';
@@ -156,7 +156,14 @@ export default function IngredientsTab({
             key={current?.id ?? 'new'}
             initial={current}
             takenNames={takenNames}
-            usedBy={current ? ingredientUsedBy(current.id, library) : []}
+            usedByNames={
+              current
+                ? [
+                    ...ingredientUsedBy(current.id, library),
+                    ...ingredientUsedByRecipes(current.id, library),
+                  ].map((x) => x.name)
+                : []
+            }
             onSubmit={(v) => (current ? onUpdate(current.id, v) : onAdd(v))}
             onDelete={current ? () => onDelete(current.id) : null}
             onClose={() => setEditing({ mode: 'closed' })}

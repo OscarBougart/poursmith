@@ -5,7 +5,7 @@ import type { Library, Prep, PrepLine } from '@/data/types';
 import { ingredientUnitCost, prepTotalCost, prepUnitCost } from '@/lib/cost';
 import { formatEur, formatNumber, formatPerUnit } from '@/lib/format';
 import type { PrepInput } from '@/hooks/useLibrary';
-import { prepUsedBy } from '@/hooks/useLibrary';
+import { prepUsedBy, prepUsedByRecipes } from '@/hooks/useLibrary';
 import { useLocale, useT } from '@/i18n';
 import PrepForm from '@/components/PrepForm';
 import SlideOver from '@/components/SlideOver';
@@ -179,7 +179,13 @@ export default function PrepsTab({
             key={current?.id ?? 'new'}
             initial={current}
             library={library}
-            usedBy={current ? prepUsedBy(current.id, library) : []}
+            usedByNames={
+              current
+                ? [...prepUsedBy(current.id, library), ...prepUsedByRecipes(current.id, library)].map(
+                    (x) => x.name,
+                  )
+                : []
+            }
             onSubmit={(v) => (current ? onUpdate(current.id, v) : onAdd(v))}
             onDelete={current ? () => onDelete(current.id) : null}
             onClose={() => setEditing({ mode: 'closed' })}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
-import type { Ingredient, NewIngredient, Prep } from '@/data/types';
+import type { Ingredient, NewIngredient } from '@/data/types';
 import { CATEGORIES, UNITS, VAT_RATES } from '@/data/types';
 import { formatEur } from '@/lib/format';
 import { parseDecimal, parseVatRate } from '@/lib/parse';
@@ -14,7 +14,7 @@ import Field from '@/components/Field';
 export interface IngredientFormProps {
   initial: Ingredient | null;
   takenNames: string[];
-  usedBy: Prep[];
+  usedByNames: string[];
   onSubmit: (v: NewIngredient) => Promise<string | null>;
   onDelete: (() => Promise<string | null>) | null;
   onClose: () => void;
@@ -49,7 +49,7 @@ function toFormValues(initial: Ingredient | null): IngredientFormValues {
 export default function IngredientForm({
   initial,
   takenNames,
-  usedBy,
+  usedByNames,
   onSubmit,
   onDelete,
   onClose,
@@ -99,7 +99,7 @@ export default function IngredientForm({
     }
   }
 
-  const usedByNames = usedBy.map((p) => p.name).join(', ');
+  const usedByList = usedByNames.join(', ');
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} noValidate>
@@ -221,7 +221,7 @@ export default function IngredientForm({
 
       {blockedByUse && (
         <p role="alert" className="mb-4 rounded-lg bg-amber-950/60 px-3 py-2 text-sm text-amber-300">
-          {t('ingredient.inUse', { names: usedByNames })}
+          {t('ingredient.inUse', { names: usedByList })}
         </p>
       )}
 
@@ -230,7 +230,7 @@ export default function IngredientForm({
           <button
             type="button"
             disabled={pending}
-            onClick={() => (usedBy.length > 0 ? setBlockedByUse(true) : setConfirming(true))}
+            onClick={() => (usedByNames.length > 0 ? setBlockedByUse(true) : setConfirming(true))}
             className="rounded-lg border border-red-900 px-4 py-2 text-sm text-red-400 transition hover:bg-red-950/50"
           >
             {t('common.delete')}

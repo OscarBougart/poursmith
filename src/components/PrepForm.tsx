@@ -14,7 +14,7 @@ import Field from '@/components/Field';
 export interface PrepFormProps {
   initial: Prep | null;
   library: Library;
-  usedBy: Prep[];
+  usedByNames: string[];
   onSubmit: (v: PrepInput) => Promise<string | null>;
   onDelete: (() => Promise<string | null>) | null;
   onClose: () => void;
@@ -59,7 +59,7 @@ function toNewLine(draft: LineDraft): NewPrepLine | null {
 export default function PrepForm({
   initial,
   library,
-  usedBy,
+  usedByNames,
   onSubmit,
   onDelete,
   onClose,
@@ -386,7 +386,7 @@ export default function PrepForm({
 
       {blockedByUse && (
         <p role="alert" className="mb-4 rounded-lg bg-amber-950/60 px-3 py-2 text-sm text-amber-300">
-          {t('prep.inUse', { names: usedBy.map((p) => p.name).join(', ') })}
+          {t('prep.inUse', { names: usedByNames.join(', ') })}
         </p>
       )}
 
@@ -395,7 +395,7 @@ export default function PrepForm({
           <button
             type="button"
             disabled={pending}
-            onClick={() => (usedBy.length > 0 ? setBlockedByUse(true) : setConfirming(true))}
+            onClick={() => (usedByNames.length > 0 ? setBlockedByUse(true) : setConfirming(true))}
             className="rounded-lg border border-red-900 px-4 py-2 text-sm text-red-400 transition hover:bg-red-950/50"
           >
             {t('common.delete')}

@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import type { ReactElement } from 'react';
-import type { Locale } from '@/data/types';
+import type { Locale, Recipe } from '@/data/types';
 import { useLibrary } from '@/hooks/useLibrary';
+import { useSettings } from '@/hooks/useSettings';
 import { useLocale, useT } from '@/i18n';
 import Banner from '@/components/Banner';
+import BatchSheetDialog from '@/components/BatchSheetDialog';
 import CsvImportDialog from '@/components/CsvImportDialog';
 import IngredientsTab from '@/components/IngredientsTab';
 import PrepsTab from '@/components/PrepsTab';
+import RecipesTab from '@/components/RecipesTab';
+import SettingsDialog from '@/components/SettingsDialog';
 
 export interface LibraryScreenProps {
   onSignOut: () => Promise<void>;
 }
 
-type Tab = 'ingredients' | 'preps';
+type Tab = 'ingredients' | 'preps' | 'recipes';
 const LOCALES: Locale[] = ['de', 'en'];
 
 export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactElement {
@@ -30,14 +34,22 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
     updatePrep,
     deletePrep,
     importIngredients,
+    addRecipe,
+    updateRecipe,
+    deleteRecipe,
+    duplicateRecipe,
   } = useLibrary(true);
+  const { targetCostPct, save: saveSettings } = useSettings(true);
   const [tab, setTab] = useState<Tab>('ingredients');
   const [importOpen, setImportOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [batchRecipe, setBatchRecipe] = useState<Recipe | null>(null);
   const [errorDismissed, setErrorDismissed] = useState(false);
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'ingredients', label: t('nav.ingredients') },
     { id: 'preps', label: t('nav.preps') },
+    { id: 'recipes', label: t('nav.recipes') },
   ];
 
   return (
@@ -46,6 +58,14 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
           <h1 className="text-xl font-semibold tracking-tight">{t('app.title')}</h1>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(true)}
+              aria-label={t('settings.title')}
+              className="rounded-lg border border-zinc-700 px-2.5 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800"
+            >
+              ⚙
+            </button>
             <div role="group" aria-label="Sprache / Language" className="flex rounded-lg border border-zinc-700 p-0.5">
               {LOCALES.map((l) => (
                 <button
@@ -111,12 +131,22 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
             onDelete={deleteIngredient}
             onOpenImport={() => setImportOpen(true)}
           />
-        ) : (
+        ) : tab === 'preps' ? (
           <PrepsTab
             library={library}
             onAdd={addPrep}
             onUpdate={updatePrep}
             onDelete={deletePrep}
+          />
+        ) : (
+          <RecipesTab
+            library={library}
+            settings={{ target_cost_pct: targetCostPct }}
+            onAdd={addRecipe}
+            onUpdate={updateRecipe}
+            onDelete={deleteRecipe}
+            onDuplicate={duplicateRecipe}
+            onOpenBatch={setBatchRecipe}
           />
         )}
       </main>
@@ -127,6 +157,20 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
         onImport={importIngredients}
         onClose={() => setImportOpen(false)}
       />
+      <BatchSheetDialog
+        recipe={batchRecipe}
+        library={library}
+        onClose={() => setBatchRecipe(null)}
+      />
+      {settingsOpen && (
+        <SettingsDialog
+          key={targetCostPct}
+          open
+          targetCostPct={targetCostPct}
+          onSave={saveSettings}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
     </div>
   );
 }
