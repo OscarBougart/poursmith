@@ -146,6 +146,7 @@ export const de = {
   'menu.worstOffender': 'Größter Ausreißer',
   'menu.none': '—',
   'menu.unpriced': 'Kein Preis',
+  'menu.flag': 'Ampel',
   'menu.inUse': 'Auf Menü(s): {names}. Zuerst dort entfernen.',
   'recipe.descriptionDe': 'Beschreibung (DE)',
   'recipe.descriptionEn': 'Beschreibung (EN)',

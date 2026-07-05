@@ -148,6 +148,7 @@ export const en: Record<keyof typeof de, string> = {
   'menu.worstOffender': 'Worst offender',
   'menu.none': '—',
   'menu.unpriced': 'No price',
+  'menu.flag': 'Flag',
   'menu.inUse': 'On menu(s): {names}. Remove it there first.',
   'recipe.descriptionDe': 'Description (DE)',
   'recipe.descriptionEn': 'Description (EN)',

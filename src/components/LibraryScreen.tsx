@@ -1,13 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
-import type { Locale, Recipe } from '@/data/types';
+import type { Locale, Menu, Recipe, Settings } from '@/data/types';
 import { useLibrary } from '@/hooks/useLibrary';
 import { useSettings } from '@/hooks/useSettings';
+import { menuAnalytics } from '@/lib/menuAnalytics';
+import { menuCsv } from '@/lib/menuCsv';
 import { useLocale, useT } from '@/i18n';
 import Banner from '@/components/Banner';
 import BatchSheetDialog from '@/components/BatchSheetDialog';
 import CsvImportDialog from '@/components/CsvImportDialog';
+import GuestMenuView from '@/components/GuestMenuView';
 import IngredientsTab from '@/components/IngredientsTab';
+import InternalMenuView from '@/components/InternalMenuView';
+import MenusTab from '@/components/MenusTab';
 import PrepsTab from '@/components/PrepsTab';
 import RecipesTab from '@/components/RecipesTab';
 import SettingsDialog from '@/components/SettingsDialog';
@@ -16,8 +21,13 @@ export interface LibraryScreenProps {
   onSignOut: () => Promise<void>;
 }
 
-type Tab = 'ingredients' | 'preps' | 'recipes';
+type Tab = 'ingredients' | 'preps' | 'recipes' | 'menus';
 const LOCALES: Locale[] = ['de', 'en'];
+
+type PrintJob =
+  | { kind: 'guest'; menu: Menu; language: Locale }
+  | { kind: 'internal'; menu: Menu }
+  | null;
 
 export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactElement {
   const t = useT();
@@ -38,23 +48,55 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
     updateRecipe,
     deleteRecipe,
     duplicateRecipe,
+    addMenu,
+    renameMenu,
+    deleteMenu,
+    addMenuItem,
+    removeMenuItem,
+    reorderMenuItem,
   } = useLibrary(true);
   const { targetCostPct, save: saveSettings } = useSettings(true);
+  const settings: Settings = { target_cost_pct: targetCostPct };
   const [tab, setTab] = useState<Tab>('ingredients');
   const [importOpen, setImportOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [batchRecipe, setBatchRecipe] = useState<Recipe | null>(null);
+  const [printJob, setPrintJob] = useState<PrintJob>(null);
   const [errorDismissed, setErrorDismissed] = useState(false);
+
+  // Print once the requested view has painted; clear when the dialog closes.
+  useEffect(() => {
+    if (printJob === null) return;
+    const done = (): void => setPrintJob(null);
+    window.addEventListener('afterprint', done);
+    const id = window.setTimeout(() => window.print(), 50);
+    return () => {
+      window.clearTimeout(id);
+      window.removeEventListener('afterprint', done);
+    };
+  }, [printJob]);
+
+  function exportCsv(menu: Menu): void {
+    const csv = menuCsv(menuAnalytics(menu.id, library, settings), locale);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${menu.name}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'ingredients', label: t('nav.ingredients') },
     { id: 'preps', label: t('nav.preps') },
     { id: 'recipes', label: t('nav.recipes') },
+    { id: 'menus', label: t('nav.menus') },
   ];
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <header className="border-b border-zinc-800">
+      <header className="border-b border-zinc-800 print:hidden">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
           <h1 className="text-xl font-semibold tracking-tight">{t('app.title')}</h1>
           <div className="flex items-center gap-3">
@@ -110,7 +152,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
         </nav>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6">
+      <main className="mx-auto max-w-5xl px-4 py-6 print:hidden">
         {error !== null && !errorDismissed && (
           <Banner
             kind="error"
@@ -138,15 +180,29 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
             onUpdate={updatePrep}
             onDelete={deletePrep}
           />
-        ) : (
+        ) : tab === 'recipes' ? (
           <RecipesTab
             library={library}
-            settings={{ target_cost_pct: targetCostPct }}
+            settings={settings}
             onAdd={addRecipe}
             onUpdate={updateRecipe}
             onDelete={deleteRecipe}
             onDuplicate={duplicateRecipe}
             onOpenBatch={setBatchRecipe}
+          />
+        ) : (
+          <MenusTab
+            library={library}
+            settings={settings}
+            onAddMenu={addMenu}
+            onRenameMenu={renameMenu}
+            onDeleteMenu={deleteMenu}
+            onAddItem={addMenuItem}
+            onRemoveItem={removeMenuItem}
+            onReorder={reorderMenuItem}
+            onExportGuest={(menu, language) => setPrintJob({ kind: 'guest', menu, language })}
+            onExportInternal={(menu) => setPrintJob({ kind: 'internal', menu })}
+            onExportCsv={exportCsv}
           />
         )}
       </main>
@@ -170,6 +226,12 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
           onSave={saveSettings}
           onClose={() => setSettingsOpen(false)}
         />
+      )}
+      {printJob?.kind === 'guest' && (
+        <GuestMenuView menu={printJob.menu} library={library} language={printJob.language} />
+      )}
+      {printJob?.kind === 'internal' && (
+        <InternalMenuView menu={printJob.menu} library={library} settings={settings} />
       )}
     </div>
   );
