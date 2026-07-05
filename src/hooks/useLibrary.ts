@@ -43,6 +43,8 @@ const EMPTY_LIBRARY: Library = {
   prepLines: [],
   recipes: [],
   recipeLines: [],
+  menus: [],
+  menuItems: [],
 };
 
 /** Preps that directly use the given ingredient. */
@@ -103,6 +105,8 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
         prepLines: prepLines.data ?? [],
         recipes: recipes.data ?? [],
         recipeLines: recipeLines.data ?? [],
+        menus: [],
+        menuItems: [],
       });
     }
     setLoading(false);

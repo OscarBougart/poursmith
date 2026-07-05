@@ -55,6 +55,8 @@ function recipe(over: Partial<Recipe> & { id: string }): Recipe {
     price_gross: null,
     target_cost_pct_override: null,
     notes: null,
+    description_de: null,
+    description_en: null,
     created_at: '',
     updated_at: '',
     ...over,
@@ -74,7 +76,16 @@ function recipeLine(over: Partial<RecipeLine> & { recipe_id: string; amount: num
 }
 
 function makeLib(over: Partial<Library>): Library {
-  return { ingredients: [], preps: [], prepLines: [], recipes: [], recipeLines: [], ...over };
+  return {
+    ingredients: [],
+    preps: [],
+    prepLines: [],
+    recipes: [],
+    recipeLines: [],
+    menus: [],
+    menuItems: [],
+    ...over,
+  };
 }
 
 const gin = ing({ id: 'gin', unit: 'ml', pack_size: 700, price_net: 14 }); // 0.02 €/ml

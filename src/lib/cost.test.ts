@@ -43,7 +43,16 @@ function line(over: Partial<PrepLine> & { prep_id: string; amount: number }): Pr
 }
 
 function makeLib(over: Partial<Library>): Library {
-  return { ingredients: [], preps: [], prepLines: [], recipes: [], recipeLines: [], ...over };
+  return {
+    ingredients: [],
+    preps: [],
+    prepLines: [],
+    recipes: [],
+    recipeLines: [],
+    menus: [],
+    menuItems: [],
+    ...over,
+  };
 }
 
 describe('ingredientUnitCost', () => {

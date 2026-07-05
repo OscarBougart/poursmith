@@ -181,6 +181,8 @@ export default function RecipeForm({
           price_gross: null,
           target_cost_pct_override: null,
           notes: null,
+          description_de: null,
+          description_en: null,
           created_at: '',
           updated_at: '',
         },
@@ -275,6 +277,8 @@ export default function RecipeForm({
       price_gross: parsedPrice,
       target_cost_pct_override: parsedOverride,
       notes: notes.trim() === '' ? null : notes.trim(),
+      description_de: null,
+      description_en: null,
       lines: newLines,
     });
     setPending(false);

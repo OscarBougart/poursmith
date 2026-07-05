@@ -63,6 +63,8 @@ export interface NewRecipe {
   price_gross: number | null;
   target_cost_pct_override: number | null;
   notes: string | null;
+  description_de: string | null;
+  description_en: string | null;
 }
 
 export interface Recipe extends NewRecipe {
@@ -88,10 +90,26 @@ export interface Settings {
   target_cost_pct: number;
 }
 
+export interface Menu {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MenuItem {
+  id: string;
+  menu_id: string;
+  recipe_id: string;
+  sort_order: number;
+}
+
 export interface Library {
   ingredients: Ingredient[];
   preps: Prep[];
   prepLines: PrepLine[];
   recipes: Recipe[];
   recipeLines: RecipeLine[];
+  menus: Menu[];
+  menuItems: MenuItem[];
 }

@@ -57,6 +57,8 @@ const recipeRow: Recipe = {
   price_gross: null,
   target_cost_pct_override: null,
   notes: null,
+  description_de: null,
+  description_en: null,
   created_at: '',
   updated_at: '',
 };
@@ -76,6 +78,8 @@ const lib: Library = {
     recipeLine({ recipe_id: 'sour', component_prep_id: 'cordial', amount: 1, unit: 'oz' }),
     recipeLine({ recipe_id: 'sour', ingredient_id: 'lime', amount: 1, unit: 'piece', is_garnish: true }),
   ],
+  menus: [],
+  menuItems: [],
 };
 
 // per serve: gin 60 ml → 1.20 €; cordial 30 ml → 0.135 €; lime → 0.50 €
