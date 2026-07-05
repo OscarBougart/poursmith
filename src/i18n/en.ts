@@ -156,6 +156,14 @@ export const en: Record<keyof typeof de, string> = {
   'flag.amber': 'Amber',
   'flag.red': 'Red',
 
+  'toast.saved': '“{name}” saved',
+  'toast.deleted': '“{name}” deleted',
+  'toast.imported': '{n} ingredients imported',
+
+  'form.discardTitle': 'Discard changes?',
+  'form.discardMessage': 'Unsaved changes will be lost.',
+  'form.discardConfirm': 'Discard',
+
   'validation.required': 'Required.',
   'validation.positive': 'Must be greater than 0.',
   'validation.nonNegative': 'Must not be negative.',

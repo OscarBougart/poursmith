@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Locale, Menu, Recipe, Settings } from '@/data/types';
 import { useLibrary } from '@/hooks/useLibrary';
+import { usePersistentState } from '@/hooks/usePersistentState';
 import { usePrintJob } from '@/hooks/usePrintJob';
 import { useSettings } from '@/hooks/useSettings';
 import { downloadFile } from '@/lib/download';
@@ -18,6 +19,7 @@ import MenusTab from '@/components/MenusTab';
 import PrepsTab from '@/components/PrepsTab';
 import RecipesTab from '@/components/RecipesTab';
 import SettingsDialog from '@/components/SettingsDialog';
+import { useToast } from '@/components/Toast';
 
 export interface LibraryScreenProps {
   onSignOut: () => Promise<void>;
@@ -54,7 +56,12 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
   } = useLibrary(true);
   const { targetCostPct, save: saveSettings } = useSettings(true);
   const settings: Settings = { target_cost_pct: targetCostPct };
-  const [tab, setTab] = useState<Tab>('ingredients');
+  const { push } = useToast();
+  const [tab, setTab] = usePersistentState<Tab>(
+    'poursmith.tab',
+    'ingredients',
+    (v): v is Tab => v === 'ingredients' || v === 'preps' || v === 'recipes' || v === 'menus',
+  );
   const [importOpen, setImportOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [batchRecipe, setBatchRecipe] = useState<Recipe | null>(null);
@@ -188,7 +195,11 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
       <CsvImportDialog
         library={library}
         open={importOpen}
-        onImport={importIngredients}
+        onImport={async (rows) => {
+          const message = await importIngredients(rows);
+          if (message === null) push(t('toast.imported', { n: rows.length }));
+          return message;
+        }}
         onClose={() => setImportOpen(false)}
       />
       <BatchSheetDialog

@@ -26,6 +26,8 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(active: boolea
 
     function onKey(event: KeyboardEvent): void {
       if (event.key !== 'Tab') return;
+      // Nested dialog (e.g. a confirm inside a slide-over): innermost trap wins.
+      event.stopPropagation();
       const items = focusables();
       const first = items[0];
       const last = items[items.length - 1];

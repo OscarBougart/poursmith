@@ -154,6 +154,14 @@ export const de = {
   'flag.amber': 'Gelb',
   'flag.red': 'Rot',
 
+  'toast.saved': '„{name}“ gespeichert',
+  'toast.deleted': '„{name}“ gelöscht',
+  'toast.imported': '{n} Zutaten importiert',
+
+  'form.discardTitle': 'Änderungen verwerfen?',
+  'form.discardMessage': 'Nicht gespeicherte Änderungen gehen verloren.',
+  'form.discardConfirm': 'Verwerfen',
+
   'validation.required': 'Pflichtfeld.',
   'validation.positive': 'Muss größer als 0 sein.',
   'validation.nonNegative': 'Darf nicht negativ sein.',

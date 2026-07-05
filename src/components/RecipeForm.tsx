@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
 import type { Library, Method, NewRecipeLine, Recipe, RecipeUnit, Settings } from '@/data/types';
 import { METHODS } from '@/data/types';
@@ -18,6 +18,7 @@ import type { RecipeCostPreview } from '@/components/CostPreview';
 import ErrorBanner from '@/components/ErrorBanner';
 import Field from '@/components/Field';
 import FormActions from '@/components/FormActions';
+import { useSlideOverGuard } from '@/components/SlideOver';
 import RecipeLinesEditor from '@/components/RecipeLinesEditor';
 import type { RecipeLineDraft } from '@/components/RecipeLinesEditor';
 import type { LineFieldErrors } from '@/components/PrepLinesEditor';
@@ -89,6 +90,25 @@ export default function RecipeForm({
   const [lineErrors, setLineErrors] = useState<Record<number, LineFieldErrors>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  // Unsaved-changes guard: compare against the first render's snapshot.
+  const guard = useSlideOverGuard();
+  const snapshot = JSON.stringify({
+    name,
+    glass,
+    ice,
+    method,
+    priceGross,
+    targetOverride,
+    notes,
+    descriptionDe,
+    descriptionEn,
+    lines: drafts.lines,
+  });
+  const pristine = useRef(snapshot).current;
+  useEffect(() => {
+    guard?.setDirty(snapshot !== pristine);
+  }, [guard, snapshot, pristine]);
 
   function selectComponent(key: number, componentKey: string): void {
     drafts.replace((prev) =>
@@ -301,7 +321,7 @@ export default function RecipeForm({
 
       <FormActions
         pending={pending}
-        onCancel={onClose}
+        onCancel={guard?.requestClose ?? onClose}
         onDelete={
           initial && onDelete
             ? {

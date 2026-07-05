@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
 import type { Library, NewPrepLine, Prep, PrepLine, Unit } from '@/data/types';
 import { UNITS } from '@/data/types';
@@ -14,6 +14,7 @@ import { useLocale, useT } from '@/i18n';
 import ErrorBanner from '@/components/ErrorBanner';
 import Field from '@/components/Field';
 import FormActions from '@/components/FormActions';
+import { useSlideOverGuard } from '@/components/SlideOver';
 import PrepLinesEditor from '@/components/PrepLinesEditor';
 import type { LineFieldErrors } from '@/components/PrepLinesEditor';
 import { INPUT_CLASS } from '@/components/formStyles';
@@ -66,6 +67,14 @@ export default function PrepForm({
   const [lineErrors, setLineErrors] = useState<Record<number, LineFieldErrors>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  // Unsaved-changes guard: compare against the first render's snapshot.
+  const guard = useSlideOverGuard();
+  const snapshot = JSON.stringify({ name, yieldAmount, yieldUnit, notes, lines: drafts.lines });
+  const pristine = useRef(snapshot).current;
+  useEffect(() => {
+    guard?.setDirty(snapshot !== pristine);
+  }, [guard, snapshot, pristine]);
 
   const preview = useMemo(() => {
     const draftLines: PrepLine[] = [];
@@ -237,7 +246,7 @@ export default function PrepForm({
 
       <FormActions
         pending={pending}
-        onCancel={onClose}
+        onCancel={guard?.requestClose ?? onClose}
         onDelete={
           initial && onDelete
             ? {

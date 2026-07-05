@@ -4,10 +4,14 @@ import type { Category, Ingredient, Library, NewIngredient } from '@/data/types'
 import { CATEGORIES } from '@/data/types';
 import { ingredientUnitCost } from '@/lib/cost';
 import { formatEur, formatNumber, formatPerUnit } from '@/lib/format';
+import { sortRows } from '@/lib/tableSort';
 import { ingredientUsedBy, ingredientUsedByRecipes } from '@/lib/usage';
+import { useTableSort } from '@/hooks/useTableSort';
 import { useLocale, useT } from '@/i18n';
 import IngredientForm from '@/components/IngredientForm';
 import SlideOver from '@/components/SlideOver';
+import SortHeader from '@/components/SortHeader';
+import { useToast } from '@/components/Toast';
 
 export interface IngredientsTabProps {
   library: Library;
@@ -19,6 +23,9 @@ export interface IngredientsTabProps {
 
 type Editing = { mode: 'closed' } | { mode: 'new' } | { mode: 'edit'; ingredient: Ingredient };
 
+const SORT_KEYS = ['name', 'category', 'pack', 'net', 'waste', 'unitCost'] as const;
+type SortKey = (typeof SORT_KEYS)[number];
+
 export default function IngredientsTab({
   library,
   onAdd,
@@ -28,18 +35,37 @@ export default function IngredientsTab({
 }: IngredientsTabProps): ReactElement {
   const t = useT();
   const { locale } = useLocale();
+  const { push } = useToast();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<Category | 'all'>('all');
   const [editing, setEditing] = useState<Editing>({ mode: 'closed' });
 
+  const { sort, toggle } = useTableSort<SortKey>('poursmith.sort.ingredients', SORT_KEYS);
+
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
-    return library.ingredients.filter(
+    const rows = library.ingredients.filter(
       (i) =>
         (category === 'all' || i.category === category) &&
         (needle === '' || i.name.toLowerCase().includes(needle)),
     );
-  }, [library.ingredients, search, category]);
+    return sortRows(rows, sort, (i, key) => {
+      switch (key) {
+        case 'name':
+          return i.name;
+        case 'category':
+          return t(`category.${i.category}`); // sort by what the user sees
+        case 'pack':
+          return i.pack_size;
+        case 'net':
+          return i.price_net;
+        case 'waste':
+          return i.waste_pct;
+        case 'unitCost':
+          return ingredientUnitCost(i);
+      }
+    });
+  }, [library.ingredients, search, category, sort, t]);
 
   const current = editing.mode === 'edit' ? editing.ingredient : null;
   const takenNames = useMemo(
@@ -101,12 +127,12 @@ export default function IngredientsTab({
           <table className="w-full text-left text-sm">
             <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-400">
               <tr>
-                <th className="px-4 py-3">{t('common.name')}</th>
-                <th className="px-4 py-3">{t('ingredient.category')}</th>
-                <th className="px-4 py-3">{t('ingredient.packSize')}</th>
-                <th className="px-4 py-3">{t('ingredient.priceNet')}</th>
-                <th className="px-4 py-3">{t('ingredient.wastePct')}</th>
-                <th className="px-4 py-3">{t('ingredient.unitCost')}</th>
+                <SortHeader columnKey="name" sort={sort} onToggle={toggle} label={t('common.name')} />
+                <SortHeader columnKey="category" sort={sort} onToggle={toggle} label={t('ingredient.category')} />
+                <SortHeader columnKey="pack" sort={sort} onToggle={toggle} label={t('ingredient.packSize')} />
+                <SortHeader columnKey="net" sort={sort} onToggle={toggle} label={t('ingredient.priceNet')} />
+                <SortHeader columnKey="waste" sort={sort} onToggle={toggle} label={t('ingredient.wastePct')} />
+                <SortHeader columnKey="unitCost" sort={sort} onToggle={toggle} label={t('ingredient.unitCost')} />
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/70">
@@ -164,8 +190,20 @@ export default function IngredientsTab({
                   ].map((x) => x.name)
                 : []
             }
-            onSubmit={(v) => (current ? onUpdate(current.id, v) : onAdd(v))}
-            onDelete={current ? () => onDelete(current.id) : null}
+            onSubmit={async (v) => {
+              const message = current ? await onUpdate(current.id, v) : await onAdd(v);
+              if (message === null) push(t('toast.saved', { name: v.name }));
+              return message;
+            }}
+            onDelete={
+              current
+                ? async () => {
+                    const message = await onDelete(current.id);
+                    if (message === null) push(t('toast.deleted', { name: current.name }));
+                    return message;
+                  }
+                : null
+            }
             onClose={() => setEditing({ mode: 'closed' })}
           />
         )}

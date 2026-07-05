@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
 import type { Ingredient, NewIngredient } from '@/data/types';
 import { CATEGORIES, UNITS, VAT_RATES } from '@/data/types';
@@ -11,6 +11,7 @@ import { useLocale, useT } from '@/i18n';
 import ErrorBanner from '@/components/ErrorBanner';
 import Field from '@/components/Field';
 import FormActions from '@/components/FormActions';
+import { useSlideOverGuard } from '@/components/SlideOver';
 import { INPUT_CLASS } from '@/components/formStyles';
 
 export interface IngredientFormProps {
@@ -55,10 +56,18 @@ export default function IngredientForm({
 }: IngredientFormProps): ReactElement {
   const t = useT();
   const { locale } = useLocale();
+  const guard = useSlideOverGuard();
   const [values, setValues] = useState<IngredientFormValues>(() => toFormValues(initial));
   const [errors, setErrors] = useState<IngredientFormErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  // Unsaved-changes guard: compare against the first render's snapshot.
+  const snapshot = JSON.stringify(values);
+  const pristine = useRef(snapshot).current;
+  useEffect(() => {
+    guard?.setDirty(snapshot !== pristine);
+  }, [guard, snapshot, pristine]);
 
   function set<K extends keyof IngredientFormValues>(key: K, value: IngredientFormValues[K]): void {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -205,7 +214,7 @@ export default function IngredientForm({
 
       <FormActions
         pending={pending}
-        onCancel={onClose}
+        onCancel={guard?.requestClose ?? onClose}
         onDelete={
           initial && onDelete
             ? {

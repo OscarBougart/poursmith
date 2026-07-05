@@ -21,8 +21,6 @@ export interface MenuAnalytics {
   worstOffenderId: string | null;
 }
 
-export type MenuSortKey = 'order' | 'price' | 'pourCost' | 'costPct' | 'margin';
-
 /** RAG flag from a cost fraction against a target percentage. */
 export function ragFlag(costPctFraction: number | null, targetPct: number): RagFlag {
   if (costPctFraction === null) return 'unpriced';
@@ -73,24 +71,6 @@ export function menuAnalytics(menuId: string, lib: Library, settings: Settings):
   );
 
   return { rows, avgCostPct, marginSpread, worstOffenderId: worst?.recipe.id ?? null };
-}
-
-/** Rows sorted by a column; 'order' keeps the stored menu order. */
-export function sortMenuRows(rows: MenuRow[], key: MenuSortKey): MenuRow[] {
-  if (key === 'order') return rows;
-  const value = (r: MenuRow): number => {
-    switch (key) {
-      case 'price':
-        return r.priceGross ?? Infinity;
-      case 'pourCost':
-        return r.pourCost;
-      case 'costPct':
-        return r.costPct ?? Infinity;
-      case 'margin':
-        return r.marginEur ?? -Infinity;
-    }
-  };
-  return [...rows].sort((a, b) => value(a) - value(b));
 }
 
 /** Display name of the worst-offending recipe, or the fallback when none. */

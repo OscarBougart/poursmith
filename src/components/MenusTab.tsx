@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
 import type { Library, Locale, Menu, Settings } from '@/data/types';
+import { usePersistentState } from '@/hooks/usePersistentState';
 import { useT } from '@/i18n';
 import { ICON_BUTTON, ICON_BUTTON_DANGER } from '@/components/buttonStyles';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import MenuDetail from '@/components/MenuDetail';
+import { useToast } from '@/components/Toast';
 
 export interface MenusTabProps {
   library: Library;
@@ -34,7 +36,12 @@ export default function MenusTab({
   onExportCsv,
 }: MenusTabProps): ReactElement {
   const t = useT();
-  const [selectedId, setSelectedId] = useState<string | null>(library.menus[0]?.id ?? null);
+  const { push } = useToast();
+  const [selectedId, setSelectedId] = usePersistentState<string | null>(
+    'poursmith.menu',
+    library.menus[0]?.id ?? null,
+    (v): v is string | null => v === null || typeof v === 'string',
+  );
   const [newName, setNewName] = useState('');
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
@@ -47,7 +54,7 @@ export default function MenusTab({
     } else if (!library.menus.some((m) => m.id === selectedId)) {
       setSelectedId(library.menus[0]?.id ?? null);
     }
-  }, [library.menus, selectedId]);
+  }, [library.menus, selectedId, setSelectedId]);
 
   const selected = library.menus.find((m) => m.id === selectedId) ?? null;
   const deletingMenu = library.menus.find((m) => m.id === deletingId) ?? null;
@@ -57,7 +64,10 @@ export default function MenusTab({
     const name = newName.trim();
     if (name === '') return;
     const message = await onAddMenu(name);
-    if (message === null) setNewName('');
+    if (message === null) {
+      setNewName('');
+      push(t('toast.saved', { name }));
+    }
   }
 
   async function handleRename(id: string): Promise<void> {
@@ -172,7 +182,10 @@ export default function MenusTab({
           message={t('menu.deleteConfirm', { name: deletingMenu.name })}
           confirmLabel={t('menu.delete')}
           onConfirm={() => {
-            void onDeleteMenu(deletingMenu.id);
+            void (async () => {
+              const message = await onDeleteMenu(deletingMenu.id);
+              if (message === null) push(t('toast.deleted', { name: deletingMenu.name }));
+            })();
             setDeletingId(null);
           }}
           onCancel={() => setDeletingId(null)}

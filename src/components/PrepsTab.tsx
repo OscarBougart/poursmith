@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import { Fragment } from 'react';
 import type { Library, Prep, PrepLine } from '@/data/types';
 import { ingredientUnitCost, prepUnitCost } from '@/lib/cost';
 import { formatEur, formatNumber, formatPerUnit } from '@/lib/format';
+import { sortRows } from '@/lib/tableSort';
 import type { PrepInput } from '@/hooks/useLibrary';
 import { prepUsedBy, prepUsedByRecipes } from '@/lib/usage';
+import { useTableSort } from '@/hooks/useTableSort';
 import { useLocale, useT } from '@/i18n';
 import { ICON_BUTTON } from '@/components/buttonStyles';
 import PrepForm from '@/components/PrepForm';
 import SlideOver from '@/components/SlideOver';
+import SortHeader from '@/components/SortHeader';
+import { useToast } from '@/components/Toast';
 
 export interface PrepsTabProps {
   library: Library;
@@ -20,6 +24,15 @@ export interface PrepsTabProps {
 
 type Editing = { mode: 'closed' } | { mode: 'new' } | { mode: 'edit'; prep: Prep };
 
+const SORT_KEYS = ['name', 'yield', 'unitCost', 'batchCost', 'components'] as const;
+type SortKey = (typeof SORT_KEYS)[number];
+
+interface Row {
+  prep: Prep;
+  lines: PrepLine[];
+  unitCost: number | null;
+}
+
 export default function PrepsTab({
   library,
   onAdd,
@@ -28,26 +41,50 @@ export default function PrepsTab({
 }: PrepsTabProps): ReactElement {
   const t = useT();
   const { locale } = useLocale();
+  const { push } = useToast();
+  const [search, setSearch] = useState('');
   const [editing, setEditing] = useState<Editing>({ mode: 'closed' });
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const { sort, toggle: toggleSort } = useTableSort<SortKey>('poursmith.sort.preps', SORT_KEYS);
 
   const current = editing.mode === 'edit' ? editing.prep : null;
 
-  function toggle(id: string): void {
+  const rows = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    const models: Row[] = library.preps
+      .filter((p) => needle === '' || p.name.toLowerCase().includes(needle))
+      .map((prep) => {
+        let unitCost: number | null;
+        try {
+          unitCost = prepUnitCost(prep.id, library);
+        } catch {
+          unitCost = null;
+        }
+        return { prep, lines: library.prepLines.filter((l) => l.prep_id === prep.id), unitCost };
+      });
+    return sortRows(models, sort, (row, key) => {
+      switch (key) {
+        case 'name':
+          return row.prep.name;
+        case 'yield':
+          return row.prep.yield_amount;
+        case 'unitCost':
+          return row.unitCost;
+        case 'batchCost':
+          return row.unitCost === null ? null : row.unitCost * row.prep.yield_amount;
+        case 'components':
+          return row.lines.length;
+      }
+    });
+  }, [library, search, sort]);
+
+  function toggleExpanded(id: string): void {
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  }
-
-  function safeUnitCost(id: string): number | null {
-    try {
-      return prepUnitCost(id, library);
-    } catch {
-      return null;
-    }
   }
 
   function lineInfo(line: PrepLine): { name: string; unitLabel: string; cost: number | null } {
@@ -62,7 +99,12 @@ export default function PrepsTab({
     }
     const prep = library.preps.find((p) => p.id === line.component_prep_id);
     if (!prep) return { name: '?', unitLabel: '', cost: null };
-    const unit = safeUnitCost(prep.id);
+    let unit: number | null;
+    try {
+      unit = prepUnitCost(prep.id, library);
+    } catch {
+      unit = null;
+    }
     return {
       name: prep.name,
       unitLabel: t(`unit.${prep.yield_unit}`),
@@ -72,17 +114,25 @@ export default function PrepsTab({
 
   return (
     <div>
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('common.search')}
+          aria-label={t('common.search')}
+          className="w-56 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
+        />
         <button
           type="button"
           onClick={() => setEditing({ mode: 'new' })}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-hover"
+          className="ml-auto rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-hover"
         >
           {t('prep.add')}
         </button>
       </div>
 
-      {library.preps.length === 0 ? (
+      {rows.length === 0 ? (
         <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-400">
           {t('prep.empty')}
         </p>
@@ -92,17 +142,15 @@ export default function PrepsTab({
             <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-400">
               <tr>
                 <th className="w-10 px-2 py-3" />
-                <th className="px-4 py-3">{t('common.name')}</th>
-                <th className="px-4 py-3">{t('prep.yieldAmount')}</th>
-                <th className="px-4 py-3">{t('prep.unitCost')}</th>
-                <th className="px-4 py-3">{t('prep.batchCost')}</th>
-                <th className="px-4 py-3">{t('prep.components')}</th>
+                <SortHeader columnKey="name" sort={sort} onToggle={toggleSort} label={t('common.name')} />
+                <SortHeader columnKey="yield" sort={sort} onToggle={toggleSort} label={t('prep.yieldAmount')} />
+                <SortHeader columnKey="unitCost" sort={sort} onToggle={toggleSort} label={t('prep.unitCost')} />
+                <SortHeader columnKey="batchCost" sort={sort} onToggle={toggleSort} label={t('prep.batchCost')} />
+                <SortHeader columnKey="components" sort={sort} onToggle={toggleSort} label={t('prep.components')} />
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/70">
-              {library.preps.map((prep) => {
-                const lines = library.prepLines.filter((l) => l.prep_id === prep.id);
-                const unitCost = safeUnitCost(prep.id);
+              {rows.map(({ prep, lines, unitCost }) => {
                 const isOpen = expanded.has(prep.id);
                 return (
                   <Fragment key={prep.id}>
@@ -110,7 +158,7 @@ export default function PrepsTab({
                       <td className="px-2 py-3">
                         <button
                           type="button"
-                          onClick={() => toggle(prep.id)}
+                          onClick={() => toggleExpanded(prep.id)}
                           aria-expanded={isOpen}
                           aria-label={`${t('prep.components')}: ${prep.name}`}
                           className={ICON_BUTTON}
@@ -189,8 +237,20 @@ export default function PrepsTab({
                   )
                 : []
             }
-            onSubmit={(v) => (current ? onUpdate(current.id, v) : onAdd(v))}
-            onDelete={current ? () => onDelete(current.id) : null}
+            onSubmit={async (v) => {
+              const message = current ? await onUpdate(current.id, v) : await onAdd(v);
+              if (message === null) push(t('toast.saved', { name: v.name }));
+              return message;
+            }}
+            onDelete={
+              current
+                ? async () => {
+                    const message = await onDelete(current.id);
+                    if (message === null) push(t('toast.deleted', { name: current.name }));
+                    return message;
+                  }
+                : null
+            }
             onClose={() => setEditing({ mode: 'closed' })}
           />
         )}

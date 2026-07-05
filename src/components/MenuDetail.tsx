@@ -2,11 +2,13 @@ import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Library, Locale, Menu, Settings } from '@/data/types';
 import { formatEur, formatPercent } from '@/lib/format';
-import type { MenuSortKey } from '@/lib/menuAnalytics';
-import { menuAnalytics, sortMenuRows, worstOffenderName } from '@/lib/menuAnalytics';
+import { menuAnalytics, worstOffenderName } from '@/lib/menuAnalytics';
+import { sortRows } from '@/lib/tableSort';
+import { useTableSort } from '@/hooks/useTableSort';
 import { useLocale, useT } from '@/i18n';
 import { ICON_BUTTON, ICON_BUTTON_DANGER } from '@/components/buttonStyles';
 import { FLAG_DOT, FLAG_ROW_TINT, FLAG_TEXT } from '@/components/flagColors';
+import SortHeader from '@/components/SortHeader';
 
 export interface MenuDetailProps {
   menu: Menu;
@@ -19,6 +21,9 @@ export interface MenuDetailProps {
   onExportInternal: () => void;
   onExportCsv: () => void;
 }
+
+const SORT_KEYS = ['price', 'pourCost', 'costPct', 'margin'] as const;
+type SortKey = (typeof SORT_KEYS)[number];
 
 export default function MenuDetail({
   menu,
@@ -33,7 +38,7 @@ export default function MenuDetail({
 }: MenuDetailProps): ReactElement {
   const t = useT();
   const { locale } = useLocale();
-  const [sortKey, setSortKey] = useState<MenuSortKey>('order');
+  const { sort, toggle } = useTableSort<SortKey>('poursmith.sort.menuBoard', SORT_KEYS);
   const [guestLang, setGuestLang] = useState<Locale>(locale);
 
   const analytics = useMemo(
@@ -49,7 +54,23 @@ export default function MenuDetail({
     return map;
   }, [library.menuItems, menu.id]);
 
-  const sortedRows = useMemo(() => sortMenuRows(analytics.rows, sortKey), [analytics.rows, sortKey]);
+  // Sorting off = the menu's own order (and the only mode where reordering makes sense).
+  const sortedRows = useMemo(
+    () =>
+      sortRows(analytics.rows, sort, (row, key) => {
+        switch (key) {
+          case 'price':
+            return row.priceGross;
+          case 'pourCost':
+            return row.pourCost;
+          case 'costPct':
+            return row.costPct;
+          case 'margin':
+            return row.marginEur;
+        }
+      }),
+    [analytics.rows, sort],
+  );
 
   const availableRecipes = useMemo(
     () => library.recipes.filter((r) => !itemByRecipe.has(r.id)),
@@ -57,22 +78,6 @@ export default function MenuDetail({
   );
 
   const worstName = worstOffenderName(analytics, library, t('menu.none'));
-
-  function header(key: MenuSortKey, label: string): ReactElement {
-    if (key === 'order') return <th className="px-4 py-3">{label}</th>;
-    return (
-      <th className="px-4 py-3">
-        <button
-          type="button"
-          onClick={() => setSortKey(key)}
-          aria-pressed={sortKey === key}
-          className={`transition hover:text-zinc-200 ${sortKey === key ? 'text-positive' : ''}`}
-        >
-          {label} {sortKey === key ? '↑' : ''}
-        </button>
-      </th>
-    );
-  }
 
   return (
     <div>
@@ -147,18 +152,18 @@ export default function MenuDetail({
             <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-400">
               <tr>
                 <th className="w-8 px-2 py-3" />
-                {header('order', t('menu.drink'))}
-                {header('price', t('recipe.priceGross'))}
-                {header('pourCost', t('recipe.pourCost'))}
-                {header('costPct', t('recipe.costPct'))}
-                {header('margin', t('recipe.margin'))}
+                <th className="px-4 py-3">{t('menu.drink')}</th>
+                <SortHeader columnKey="price" sort={sort} onToggle={toggle} label={t('recipe.priceGross')} />
+                <SortHeader columnKey="pourCost" sort={sort} onToggle={toggle} label={t('recipe.pourCost')} />
+                <SortHeader columnKey="costPct" sort={sort} onToggle={toggle} label={t('recipe.costPct')} />
+                <SortHeader columnKey="margin" sort={sort} onToggle={toggle} label={t('recipe.margin')} />
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/70">
               {sortedRows.map((row, index) => {
                 const itemId = itemByRecipe.get(row.recipe.id);
-                const canReorder = sortKey === 'order';
+                const canReorder = sort === null;
                 return (
                   <tr key={row.recipe.id} className={FLAG_ROW_TINT[row.flag] || 'bg-zinc-950/40'}>
                     <td className="px-2 py-3">

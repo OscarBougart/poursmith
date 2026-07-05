@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LocaleProvider, useT } from '@/i18n';
 import LibraryScreen from '@/components/LibraryScreen';
 import LoginScreen from '@/components/LoginScreen';
+import { ToastProvider } from '@/components/Toast';
 
 function AuthGate(): ReactElement {
   const t = useT();
@@ -21,7 +22,9 @@ function AuthGate(): ReactElement {
 export default function App(): ReactElement {
   return (
     <LocaleProvider>
-      <AuthGate />
+      <ToastProvider>
+        <AuthGate />
+      </ToastProvider>
     </LocaleProvider>
   );
 }
