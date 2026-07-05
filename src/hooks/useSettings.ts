@@ -15,17 +15,21 @@ export function useSettings(enabled: boolean): UseSettingsResult {
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
-    void supabase
-      .from('settings')
-      .select('id, target_cost_pct')
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
+    void (async () => {
+      try {
+        const { data } = await supabase
+          .from('settings')
+          .select('id, target_cost_pct')
+          .limit(1)
+          .maybeSingle();
         if (!cancelled && data) {
           setRowId(data.id as string);
           setTargetCostPct(Number(data.target_cost_pct));
         }
-      });
+      } catch {
+        // keep the default target if settings can't be loaded
+      }
+    })();
     return () => {
       cancelled = true;
     };

@@ -4,12 +4,14 @@ import type { Ingredient, NewIngredient } from '@/data/types';
 import { CATEGORIES, UNITS, VAT_RATES } from '@/data/types';
 import { formatEur } from '@/lib/format';
 import { parseDecimal, parseVatRate } from '@/lib/parse';
-import type { IngredientFormValues } from '@/lib/validation';
+import { priceNet } from '@/lib/pricing';
+import type { IngredientFormValues, IngredientFormErrors } from '@/lib/validation';
 import { validateIngredient } from '@/lib/validation';
 import { useLocale, useT } from '@/i18n';
-import type { IngredientFormErrors } from '@/lib/validation';
-import ConfirmDialog from '@/components/ConfirmDialog';
+import ErrorBanner from '@/components/ErrorBanner';
 import Field from '@/components/Field';
+import FormActions from '@/components/FormActions';
+import { INPUT_CLASS } from '@/components/formStyles';
 
 export interface IngredientFormProps {
   initial: Ingredient | null;
@@ -19,9 +21,6 @@ export interface IngredientFormProps {
   onDelete: (() => Promise<string | null>) | null;
   onClose: () => void;
 }
-
-const INPUT_CLASS =
-  'w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-zinc-100 outline-none focus:border-emerald-500';
 
 function toFormValues(initial: Ingredient | null): IngredientFormValues {
   if (!initial) {
@@ -60,8 +59,6 @@ export default function IngredientForm({
   const [errors, setErrors] = useState<IngredientFormErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [confirming, setConfirming] = useState(false);
-  const [blockedByUse, setBlockedByUse] = useState(false);
 
   function set<K extends keyof IngredientFormValues>(key: K, value: IngredientFormValues[K]): void {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -69,7 +66,7 @@ export default function IngredientForm({
 
   const gross = parseDecimal(values.price_gross);
   const vat = parseVatRate(values.vat_rate);
-  const netPreview = gross !== null && vat !== null ? formatEur(gross / (1 + vat), locale) : '—';
+  const netPreview = gross !== null && vat !== null ? formatEur(priceNet(gross, vat), locale) : '—';
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -79,35 +76,22 @@ export default function IngredientForm({
     setPending(true);
     const message = await onSubmit(result.value);
     setPending(false);
-    if (message !== null) {
-      setServerError(message);
-    } else {
-      onClose();
-    }
+    if (message !== null) setServerError(message);
+    else onClose();
   }
 
   async function handleDelete(): Promise<void> {
     if (!onDelete) return;
-    setConfirming(false);
     setPending(true);
     const message = await onDelete();
     setPending(false);
-    if (message !== null) {
-      setServerError(message);
-    } else {
-      onClose();
-    }
+    if (message !== null) setServerError(message);
+    else onClose();
   }
-
-  const usedByList = usedByNames.join(', ');
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} noValidate>
-      {serverError !== null && (
-        <p role="alert" className="mb-4 rounded-lg bg-red-950/60 px-3 py-2 text-sm text-red-300">
-          {t('common.error.generic', { message: serverError })}
-        </p>
-      )}
+      {serverError !== null && <ErrorBanner message={serverError} />}
 
       <Field label={t('common.name')} htmlFor="ing-name" error={errors.name && t(errors.name)}>
         <input
@@ -219,52 +203,20 @@ export default function IngredientForm({
         />
       </Field>
 
-      {blockedByUse && (
-        <p role="alert" className="mb-4 rounded-lg bg-amber-950/60 px-3 py-2 text-sm text-amber-300">
-          {t('ingredient.inUse', { names: usedByList })}
-        </p>
-      )}
-
-      <div className="mt-6 flex items-center justify-between gap-3">
-        {initial && onDelete ? (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => (usedByNames.length > 0 ? setBlockedByUse(true) : setConfirming(true))}
-            className="rounded-lg border border-red-900 px-4 py-2 text-sm text-red-400 transition hover:bg-red-950/50"
-          >
-            {t('common.delete')}
-          </button>
-        ) : (
-          <span />
-        )}
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
-          >
-            {t('common.cancel')}
-          </button>
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:opacity-60"
-          >
-            {pending ? t('common.saving') : t('common.save')}
-          </button>
-        </div>
-      </div>
-
-      {confirming && initial && (
-        <ConfirmDialog
-          title={t('common.delete')}
-          message={t('ingredient.deleteConfirm', { name: initial.name })}
-          confirmLabel={t('common.delete')}
-          onConfirm={() => void handleDelete()}
-          onCancel={() => setConfirming(false)}
-        />
-      )}
+      <FormActions
+        pending={pending}
+        onCancel={onClose}
+        onDelete={
+          initial && onDelete
+            ? {
+                usedByNames,
+                inUseMessage: t('ingredient.inUse', { names: usedByNames.join(', ') }),
+                confirmMessage: t('ingredient.deleteConfirm', { name: initial.name }),
+                run: () => void handleDelete(),
+              }
+            : undefined
+        }
+      />
     </form>
   );
 }

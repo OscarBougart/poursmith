@@ -3,6 +3,7 @@ import type { ChangeEvent, ReactElement } from 'react';
 import type { Library, NewIngredient } from '@/data/types';
 import type { CsvParseResult } from '@/lib/csv';
 import { ingredientCsvTemplate, parseIngredientCsv } from '@/lib/csv';
+import { downloadFile } from '@/lib/download';
 import { formatNumber } from '@/lib/format';
 import { useLocale, useT } from '@/i18n';
 import SlideOver from '@/components/SlideOver';
@@ -28,21 +29,19 @@ export default function CsvImportDialog({
   const fileInput = useRef<HTMLInputElement>(null);
 
   function downloadTemplate(): void {
-    const blob = new Blob([ingredientCsvTemplate()], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = 'poursmith-ingredients.csv';
-    anchor.click();
-    URL.revokeObjectURL(url);
+    downloadFile('poursmith-ingredients.csv', ingredientCsvTemplate());
   }
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>): Promise<void> {
     const file = event.target.files?.[0];
     if (!file) return;
-    const text = await file.text();
-    setResult(parseIngredientCsv(text, library.ingredients.map((i) => i.name)));
-    setServerError(null);
+    try {
+      const text = await file.text();
+      setResult(parseIngredientCsv(text, library.ingredients.map((i) => i.name)));
+      setServerError(null);
+    } catch (e) {
+      setServerError(e instanceof Error ? e.message : String(e));
+    }
   }
 
   async function handleImport(): Promise<void> {

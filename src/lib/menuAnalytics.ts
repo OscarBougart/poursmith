@@ -1,4 +1,5 @@
 import type { Library, Recipe, Settings } from '@/data/types';
+import { indexLibrary } from '@/lib/libraryIndex';
 import { costPct, effectiveTargetPct, grossMarginEur } from '@/lib/pricing';
 import { recipePourCost } from '@/lib/recipeCost';
 
@@ -20,6 +21,8 @@ export interface MenuAnalytics {
   worstOffenderId: string | null;
 }
 
+export type MenuSortKey = 'order' | 'price' | 'pourCost' | 'costPct' | 'margin';
+
 /** RAG flag from a cost fraction against a target percentage. */
 export function ragFlag(costPctFraction: number | null, targetPct: number): RagFlag {
   if (costPctFraction === null) return 'unpriced';
@@ -30,13 +33,12 @@ export function ragFlag(costPctFraction: number | null, targetPct: number): RagF
 }
 
 export function menuAnalytics(menuId: string, lib: Library, settings: Settings): MenuAnalytics {
-  const items = lib.menuItems
-    .filter((i) => i.menu_id === menuId)
-    .sort((a, b) => a.sort_order - b.sort_order);
+  const idx = indexLibrary(lib);
+  const items = [...idx.menuItemsOf(menuId)].sort((a, b) => a.sort_order - b.sort_order);
 
   const rows: MenuRow[] = [];
   for (const item of items) {
-    const recipe = lib.recipes.find((r) => r.id === item.recipe_id);
+    const recipe = idx.recipe(item.recipe_id);
     if (!recipe) continue;
     let pourCost: number;
     try {
@@ -45,14 +47,13 @@ export function menuAnalytics(menuId: string, lib: Library, settings: Settings):
       continue; // recipe with a broken component — skip from the board
     }
     const pct = costPct(pourCost, recipe.price_gross);
-    const target = effectiveTargetPct(recipe.target_cost_pct_override, settings);
     rows.push({
       recipe,
       pourCost,
       priceGross: recipe.price_gross,
       costPct: pct,
       marginEur: grossMarginEur(pourCost, recipe.price_gross),
-      flag: ragFlag(pct, target),
+      flag: ragFlag(pct, effectiveTargetPct(recipe.target_cost_pct_override, settings)),
     });
   }
 
@@ -66,14 +67,38 @@ export function menuAnalytics(menuId: string, lib: Library, settings: Settings):
   const marginSpread =
     margins.length === 0 ? null : { min: Math.min(...margins), max: Math.max(...margins) };
 
-  let worstOffenderId: string | null = null;
-  let worstPct = -Infinity;
-  for (const row of priced) {
-    if ((row.costPct ?? 0) > worstPct) {
-      worstPct = row.costPct ?? 0;
-      worstOffenderId = row.recipe.id;
-    }
-  }
+  const worst = priced.reduce<MenuRow | null>(
+    (acc, r) => (acc === null || (r.costPct ?? 0) > (acc.costPct ?? 0) ? r : acc),
+    null,
+  );
 
-  return { rows, avgCostPct, marginSpread, worstOffenderId };
+  return { rows, avgCostPct, marginSpread, worstOffenderId: worst?.recipe.id ?? null };
+}
+
+/** Rows sorted by a column; 'order' keeps the stored menu order. */
+export function sortMenuRows(rows: MenuRow[], key: MenuSortKey): MenuRow[] {
+  if (key === 'order') return rows;
+  const value = (r: MenuRow): number => {
+    switch (key) {
+      case 'price':
+        return r.priceGross ?? Infinity;
+      case 'pourCost':
+        return r.pourCost;
+      case 'costPct':
+        return r.costPct ?? Infinity;
+      case 'margin':
+        return r.marginEur ?? -Infinity;
+    }
+  };
+  return [...rows].sort((a, b) => value(a) - value(b));
+}
+
+/** Display name of the worst-offending recipe, or the fallback when none. */
+export function worstOffenderName(
+  analytics: MenuAnalytics,
+  lib: Library,
+  fallback: string,
+): string {
+  if (analytics.worstOffenderId === null) return fallback;
+  return indexLibrary(lib).recipe(analytics.worstOffenderId)?.name ?? fallback;
 }

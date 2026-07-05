@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Library, Locale, Menu, Settings } from '@/data/types';
-import { formatEur } from '@/lib/format';
-import type { MenuRow, RagFlag } from '@/lib/menuAnalytics';
-import { menuAnalytics } from '@/lib/menuAnalytics';
+import { formatEur, formatPercent } from '@/lib/format';
+import type { MenuSortKey, RagFlag } from '@/lib/menuAnalytics';
+import { menuAnalytics, sortMenuRows, worstOffenderName } from '@/lib/menuAnalytics';
 import { useLocale, useT } from '@/i18n';
 
 export interface MenuDetailProps {
@@ -17,8 +17,6 @@ export interface MenuDetailProps {
   onExportInternal: () => void;
   onExportCsv: () => void;
 }
-
-type SortKey = 'order' | 'price' | 'pourCost' | 'costPct' | 'margin';
 
 const FLAG_DOT: Record<RagFlag, string> = {
   green: 'bg-emerald-500',
@@ -40,7 +38,7 @@ export default function MenuDetail({
 }: MenuDetailProps): ReactElement {
   const t = useT();
   const { locale } = useLocale();
-  const [sortKey, setSortKey] = useState<SortKey>('order');
+  const [sortKey, setSortKey] = useState<MenuSortKey>('order');
   const [guestLang, setGuestLang] = useState<Locale>(locale);
 
   const analytics = useMemo(
@@ -56,34 +54,16 @@ export default function MenuDetail({
     return map;
   }, [library.menuItems, menu.id]);
 
-  const sortedRows = useMemo(() => {
-    if (sortKey === 'order') return analytics.rows;
-    const withValue = (r: MenuRow): number => {
-      switch (sortKey) {
-        case 'price':
-          return r.priceGross ?? Infinity;
-        case 'pourCost':
-          return r.pourCost;
-        case 'costPct':
-          return r.costPct ?? Infinity;
-        case 'margin':
-          return r.marginEur ?? -Infinity;
-      }
-    };
-    return [...analytics.rows].sort((a, b) => withValue(a) - withValue(b));
-  }, [analytics.rows, sortKey]);
+  const sortedRows = useMemo(() => sortMenuRows(analytics.rows, sortKey), [analytics.rows, sortKey]);
 
   const availableRecipes = useMemo(
     () => library.recipes.filter((r) => !itemByRecipe.has(r.id)),
     [library.recipes, itemByRecipe],
   );
 
-  const worstOffenderName =
-    analytics.worstOffenderId !== null
-      ? (library.recipes.find((r) => r.id === analytics.worstOffenderId)?.name ?? t('menu.none'))
-      : t('menu.none');
+  const worstName = worstOffenderName(analytics, library, t('menu.none'));
 
-  function header(key: SortKey, label: string): ReactElement {
+  function header(key: MenuSortKey, label: string): ReactElement {
     if (key === 'order') return <th className="px-4 py-3">{label}</th>;
     return (
       <th className="px-4 py-3">
@@ -129,7 +109,7 @@ export default function MenuDetail({
         <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
           <p className="text-xs text-zinc-500">{t('menu.avgCostPct')}</p>
           <p className="text-lg font-medium text-zinc-100">
-            {analytics.avgCostPct !== null ? `${(analytics.avgCostPct * 100).toFixed(1)} %` : t('menu.none')}
+            {analytics.avgCostPct !== null ? formatPercent(analytics.avgCostPct, locale) : t('menu.none')}
           </p>
         </div>
         <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
@@ -142,7 +122,7 @@ export default function MenuDetail({
         </div>
         <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
           <p className="text-xs text-zinc-500">{t('menu.worstOffender')}</p>
-          <p className="text-lg font-medium text-zinc-100">{worstOffenderName}</p>
+          <p className="text-lg font-medium text-zinc-100">{worstName}</p>
         </div>
       </div>
 
@@ -195,7 +175,7 @@ export default function MenuDetail({
                     </td>
                     <td className="px-4 py-3 text-emerald-400">{formatEur(row.pourCost, locale)}</td>
                     <td className="px-4 py-3 text-zinc-300">
-                      {row.costPct !== null ? `${(row.costPct * 100).toFixed(1)} %` : '—'}
+                      {row.costPct !== null ? formatPercent(row.costPct, locale) : '—'}
                     </td>
                     <td className="px-4 py-3 text-zinc-300">
                       {row.marginEur !== null ? formatEur(row.marginEur, locale) : '—'}

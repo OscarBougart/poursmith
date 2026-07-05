@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MenuAnalytics, MenuRow } from '@/lib/menuAnalytics';
 import { menuCsv } from '@/lib/menuCsv';
-import { formatEur, formatNumber } from '@/lib/format';
+import { formatEur, formatPercent } from '@/lib/format';
 
 function row(over: Partial<MenuRow> & { id: string }): MenuRow {
   return {
@@ -57,7 +57,7 @@ describe('menuCsv', () => {
         'Negroni',
         formatEur(12, 'de'),
         formatEur(1.5, 'de'),
-        `${formatNumber(14.88, 'de')} %`,
+        formatPercent(0.1488, 'de'),
         formatEur(8.58, 'de'),
         'green',
       ].join(';'),
@@ -71,6 +71,6 @@ describe('menuCsv', () => {
 
   it('ends with an average line reflecting priced drinks', () => {
     const lines = menuCsv(analytics, 'de').split('\n');
-    expect(lines[3]).toBe(`average;;;${formatNumber(14.88, 'de')} %;;`);
+    expect(lines[3]).toBe(`average;;;${formatPercent(0.1488, 'de')};;`);
   });
 });

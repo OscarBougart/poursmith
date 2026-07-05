@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Library, Recipe, Settings } from '@/data/types';
-import { formatEur } from '@/lib/format';
+import { formatEur, formatPercent } from '@/lib/format';
 import { costPct, effectiveTargetPct, grossMarginEur, suggestedPriceGross } from '@/lib/pricing';
 import { recipePourCost } from '@/lib/recipeCost';
 import type { RecipeInput } from '@/hooks/useLibrary';
-import { recipeUsedByMenus } from '@/hooks/useLibrary';
+import { recipeUsedByMenus } from '@/lib/usage';
 import { useLocale, useT } from '@/i18n';
 import RecipeForm from '@/components/RecipeForm';
 import SlideOver from '@/components/SlideOver';
@@ -116,7 +116,7 @@ export default function RecipesTab({
                       {pourCost !== null ? formatEur(pourCost, locale) : '—'}
                     </td>
                     <td className="px-4 py-3 text-zinc-300">
-                      {pct !== null ? `${(pct * 100).toFixed(1)} %` : '—'}
+                      {pct !== null ? formatPercent(pct, locale) : '—'}
                     </td>
                     <td className="px-4 py-3 text-zinc-300">
                       {margin !== null ? formatEur(margin, locale) : '—'}

@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Locale, Menu, Recipe, Settings } from '@/data/types';
 import { useLibrary } from '@/hooks/useLibrary';
+import { usePrintJob } from '@/hooks/usePrintJob';
 import { useSettings } from '@/hooks/useSettings';
+import { downloadFile } from '@/lib/download';
 import { menuAnalytics } from '@/lib/menuAnalytics';
 import { menuCsv } from '@/lib/menuCsv';
 import { useLocale, useT } from '@/i18n';
@@ -23,11 +25,6 @@ export interface LibraryScreenProps {
 
 type Tab = 'ingredients' | 'preps' | 'recipes' | 'menus';
 const LOCALES: Locale[] = ['de', 'en'];
-
-type PrintJob =
-  | { kind: 'guest'; menu: Menu; language: Locale }
-  | { kind: 'internal'; menu: Menu }
-  | null;
 
 export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactElement {
   const t = useT();
@@ -61,30 +58,11 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
   const [importOpen, setImportOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [batchRecipe, setBatchRecipe] = useState<Recipe | null>(null);
-  const [printJob, setPrintJob] = useState<PrintJob>(null);
+  const [printJob, setPrintJob] = usePrintJob();
   const [errorDismissed, setErrorDismissed] = useState(false);
 
-  // Print once the requested view has painted; clear when the dialog closes.
-  useEffect(() => {
-    if (printJob === null) return;
-    const done = (): void => setPrintJob(null);
-    window.addEventListener('afterprint', done);
-    const id = window.setTimeout(() => window.print(), 50);
-    return () => {
-      window.clearTimeout(id);
-      window.removeEventListener('afterprint', done);
-    };
-  }, [printJob]);
-
   function exportCsv(menu: Menu): void {
-    const csv = menuCsv(menuAnalytics(menu.id, library, settings), locale);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = `${menu.name}.csv`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    downloadFile(`${menu.name}.csv`, menuCsv(menuAnalytics(menu.id, library, settings), locale));
   }
 
   const tabs: { id: Tab; label: string }[] = [

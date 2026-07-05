@@ -8,6 +8,11 @@ export function netOfVat(gross: number): number {
   return gross / (1 + SALES_VAT);
 }
 
+/** Net purchase price at a given VAT rate, rounded to 4 dp to match the DB. */
+export function priceNet(gross: number, vatRate: number): number {
+  return Math.round((gross / (1 + vatRate)) * 1e4) / 1e4;
+}
+
 /** Pour cost over net selling price, as a fraction (0.2 = 20 %). Null without a usable price. */
 export function costPct(pourCost: number, priceGross: number | null): number | null {
   if (priceGross === null || priceGross <= 0) return null;

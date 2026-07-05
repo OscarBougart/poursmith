@@ -2,10 +2,10 @@ import { useState } from 'react';
 import type { ReactElement } from 'react';
 import { Fragment } from 'react';
 import type { Library, Prep, PrepLine } from '@/data/types';
-import { ingredientUnitCost, prepTotalCost, prepUnitCost } from '@/lib/cost';
+import { ingredientUnitCost, prepUnitCost } from '@/lib/cost';
 import { formatEur, formatNumber, formatPerUnit } from '@/lib/format';
 import type { PrepInput } from '@/hooks/useLibrary';
-import { prepUsedBy, prepUsedByRecipes } from '@/hooks/useLibrary';
+import { prepUsedBy, prepUsedByRecipes } from '@/lib/usage';
 import { useLocale, useT } from '@/i18n';
 import PrepForm from '@/components/PrepForm';
 import SlideOver from '@/components/SlideOver';
@@ -135,7 +135,9 @@ export default function PrepsTab({
                           : '—'}
                       </td>
                       <td className="px-4 py-3 text-zinc-300">
-                        {unitCost !== null ? formatEur(prepTotalCost(prep.id, library), locale) : '—'}
+                        {unitCost !== null
+                          ? formatEur(unitCost * prep.yield_amount, locale)
+                          : '—'}
                       </td>
                       <td className="px-4 py-3 text-zinc-400">{lines.length}</td>
                     </tr>

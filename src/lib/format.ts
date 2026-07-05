@@ -23,3 +23,13 @@ export function formatPerUnit(value: number, unitLabel: string, locale: Locale):
 export function formatNumber(value: number, locale: Locale): string {
   return new Intl.NumberFormat(LOCALE_TAGS[locale], { maximumFractionDigits: 2 }).format(value);
 }
+
+/** A cost fraction (0.15) as a localized percentage, e.g. '15,0 %'. One source
+ *  of truth so the on-screen board and the CSV export always agree. */
+export function formatPercent(fraction: number, locale: Locale): string {
+  const value = new Intl.NumberFormat(LOCALE_TAGS[locale], {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(fraction * 100);
+  return `${value} %`;
+}

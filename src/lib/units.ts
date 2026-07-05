@@ -30,3 +30,10 @@ export function convertAmount(amount: number, from: RecipeUnit, to: Unit): numbe
   if (from === to) return amount; // g→g, piece→piece
   throw new UnitError(from, to);
 }
+
+/** Whether a recipe-line unit can be costed against a component's native unit. */
+export function unitCompatible(unit: RecipeUnit, native: Unit | null): boolean {
+  if (native === null) return true; // no component chosen yet
+  if (native === 'ml') return isVolumeUnit(unit);
+  return unit === native;
+}

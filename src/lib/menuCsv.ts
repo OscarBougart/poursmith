@@ -1,11 +1,11 @@
 import type { Locale } from '@/data/types';
-import { formatEur, formatNumber } from '@/lib/format';
+import { formatEur, formatPercent } from '@/lib/format';
 import type { MenuAnalytics } from '@/lib/menuAnalytics';
 
 const HEADER = 'name;price;pour_cost;cost_pct;margin;flag';
 
 function pctCell(fraction: number | null, locale: Locale): string {
-  return fraction === null ? '' : `${formatNumber(fraction * 100, locale)} %`;
+  return fraction === null ? '' : formatPercent(fraction, locale);
 }
 
 /** Internal menu export as semicolon-delimited CSV, formatted to match the board. */

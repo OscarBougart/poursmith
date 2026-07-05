@@ -1,5 +1,7 @@
 import type { Library, Method, RecipeLine, RecipeUnit } from '@/data/types';
+import { lineComponentName } from '@/lib/component';
 import { CostError } from '@/lib/cost';
+import { indexLibrary } from '@/lib/libraryIndex';
 import { recipeLineCost } from '@/lib/recipeCost';
 import { toMl } from '@/lib/units';
 
@@ -29,17 +31,9 @@ export interface BatchSheet {
 }
 
 function linesOf(recipeId: string, lib: Library): RecipeLine[] {
-  if (!lib.recipes.some((r) => r.id === recipeId)) {
-    throw new CostError(`Unknown recipe: ${recipeId}`, 'missing');
-  }
-  return lib.recipeLines.filter((l) => l.recipe_id === recipeId);
-}
-
-function componentName(line: RecipeLine, lib: Library): string {
-  if (line.ingredient_id !== null) {
-    return lib.ingredients.find((i) => i.id === line.ingredient_id)?.name ?? '?';
-  }
-  return lib.preps.find((p) => p.id === line.component_prep_id)?.name ?? '?';
+  const idx = indexLibrary(lib);
+  if (!idx.recipe(recipeId)) throw new CostError(`Unknown recipe: ${recipeId}`, 'missing');
+  return idx.recipeLinesOf(recipeId);
 }
 
 /** Pre-dilution liquid volume of one serve in ml; g/piece lines carry no volume. */
@@ -59,7 +53,7 @@ function buildSheet(recipeId: string, lib: Library, scale: number, dilutionPct: 
     totalCost += cost;
     const ml = toMl(line.amount, line.unit);
     return {
-      name: componentName(line, lib),
+      name: lineComponentName(line, lib),
       amount: line.amount * scale,
       unit: line.unit,
       amountMl: ml === null ? null : ml * scale,

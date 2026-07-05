@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import type {
   Library,
-  Menu,
   NewIngredient,
   NewPrep,
   NewPrepLine,
   NewRecipe,
   NewRecipeLine,
-  Prep,
-  Recipe,
 } from '@/data/types';
 import { supabase } from '@/lib/supabase';
 
@@ -44,6 +41,25 @@ export interface UseLibraryResult {
   reorderMenuItem: (id: string, direction: 'up' | 'down') => Promise<string | null>;
 }
 
+type LibraryTable =
+  | 'ingredients'
+  | 'preps'
+  | 'prep_lines'
+  | 'recipes'
+  | 'recipe_lines'
+  | 'menus'
+  | 'menu_items';
+
+const ALL_TABLES: LibraryTable[] = [
+  'ingredients',
+  'preps',
+  'prep_lines',
+  'recipes',
+  'recipe_lines',
+  'menus',
+  'menu_items',
+];
+
 const EMPTY_LIBRARY: Library = {
   ingredients: [],
   preps: [],
@@ -54,44 +70,27 @@ const EMPTY_LIBRARY: Library = {
   menuItems: [],
 };
 
-/** Preps that directly use the given ingredient. */
-export function ingredientUsedBy(id: string, lib: Library): Prep[] {
-  const prepIds = new Set(
-    lib.prepLines.filter((l) => l.ingredient_id === id).map((l) => l.prep_id),
-  );
-  return lib.preps.filter((p) => prepIds.has(p.id));
+function selectTable(table: LibraryTable) {
+  switch (table) {
+    case 'ingredients':
+      return supabase.from('ingredients').select('*').order('name');
+    case 'preps':
+      return supabase.from('preps').select('*').order('name');
+    case 'prep_lines':
+      return supabase.from('prep_lines').select('*');
+    case 'recipes':
+      return supabase.from('recipes').select('*').order('name');
+    case 'recipe_lines':
+      return supabase.from('recipe_lines').select('*');
+    case 'menus':
+      return supabase.from('menus').select('*').order('name');
+    case 'menu_items':
+      return supabase.from('menu_items').select('*');
+  }
 }
 
-/** Preps that directly use the given prep as a component. */
-export function prepUsedBy(id: string, lib: Library): Prep[] {
-  const prepIds = new Set(
-    lib.prepLines.filter((l) => l.component_prep_id === id).map((l) => l.prep_id),
-  );
-  return lib.preps.filter((p) => prepIds.has(p.id));
-}
-
-/** Recipes that directly use the given ingredient. */
-export function ingredientUsedByRecipes(id: string, lib: Library): Recipe[] {
-  const recipeIds = new Set(
-    lib.recipeLines.filter((l) => l.ingredient_id === id).map((l) => l.recipe_id),
-  );
-  return lib.recipes.filter((r) => recipeIds.has(r.id));
-}
-
-/** Recipes that directly use the given prep. */
-export function prepUsedByRecipes(id: string, lib: Library): Recipe[] {
-  const recipeIds = new Set(
-    lib.recipeLines.filter((l) => l.component_prep_id === id).map((l) => l.recipe_id),
-  );
-  return lib.recipes.filter((r) => recipeIds.has(r.id));
-}
-
-/** Menus that contain the given recipe. */
-export function recipeUsedByMenus(id: string, lib: Library): Menu[] {
-  const menuIds = new Set(
-    lib.menuItems.filter((i) => i.recipe_id === id).map((i) => i.menu_id),
-  );
-  return lib.menus.filter((m) => menuIds.has(m.id));
+function errorMessage(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
 }
 
 export function useLibrary(enabled: boolean): UseLibraryResult {
@@ -99,42 +98,55 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
-    if (!enabled) return;
-    const [ingredients, preps, prepLines, recipes, recipeLines, menus, menuItems] =
-      await Promise.all([
-        supabase.from('ingredients').select('*').order('name'),
-        supabase.from('preps').select('*').order('name'),
-        supabase.from('prep_lines').select('*'),
-        supabase.from('recipes').select('*').order('name'),
-        supabase.from('recipe_lines').select('*'),
-        supabase.from('menus').select('*').order('name'),
-        supabase.from('menu_items').select('*'),
-      ]);
-    const firstError =
-      ingredients.error ??
-      preps.error ??
-      prepLines.error ??
-      recipes.error ??
-      recipeLines.error ??
-      menus.error ??
-      menuItems.error;
-    if (firstError) {
-      setError(firstError.message);
-    } else {
-      setError(null);
-      setLibrary({
-        ingredients: ingredients.data ?? [],
-        preps: preps.data ?? [],
-        prepLines: prepLines.data ?? [],
-        recipes: recipes.data ?? [],
-        recipeLines: recipeLines.data ?? [],
-        menus: menus.data ?? [],
-        menuItems: menuItems.data ?? [],
-      });
-    }
-    setLoading(false);
-  }, [enabled]);
+  const refresh = useCallback(
+    async (tables: LibraryTable[] = ALL_TABLES) => {
+      if (!enabled) return;
+      try {
+        const results = await Promise.all(tables.map((table) => selectTable(table)));
+        const failed = results.find((r) => r.error);
+        if (failed?.error) {
+          setError(failed.error.message);
+          return;
+        }
+        setError(null);
+        setLibrary((prev) => {
+          const next = { ...prev };
+          tables.forEach((table, i) => {
+            const rows = results[i]?.data ?? [];
+            switch (table) {
+              case 'ingredients':
+                next.ingredients = rows;
+                break;
+              case 'preps':
+                next.preps = rows;
+                break;
+              case 'prep_lines':
+                next.prepLines = rows;
+                break;
+              case 'recipes':
+                next.recipes = rows;
+                break;
+              case 'recipe_lines':
+                next.recipeLines = rows;
+                break;
+              case 'menus':
+                next.menus = rows;
+                break;
+              case 'menu_items':
+                next.menuItems = rows;
+                break;
+            }
+          });
+          return next;
+        });
+      } catch (e) {
+        setError(errorMessage(e));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [enabled],
+  );
 
   useEffect(() => {
     if (enabled) {
@@ -145,11 +157,20 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
     }
   }, [enabled, refresh]);
 
+  // Run a write, then refetch only the tables it touched. A thrown operation
+  // (e.g. the network dropping) becomes an error message instead of a hang.
   const run = useCallback(
-    async (operation: () => Promise<string | null>): Promise<string | null> => {
-      const message = await operation();
-      if (message === null) await refresh();
-      return message;
+    async (
+      operation: () => Promise<string | null>,
+      tables: LibraryTable[],
+    ): Promise<string | null> => {
+      try {
+        const message = await operation();
+        if (message === null) await refresh(tables);
+        return message;
+      } catch (e) {
+        return errorMessage(e);
+      }
     },
     [refresh],
   );
@@ -159,7 +180,7 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
       run(async () => {
         const { error: e } = await supabase.from('ingredients').insert(v);
         return e ? e.message : null;
-      }),
+      }, ['ingredients']),
     [run],
   );
 
@@ -168,7 +189,7 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
       run(async () => {
         const { error: e } = await supabase.from('ingredients').update(v).eq('id', id);
         return e ? e.message : null;
-      }),
+      }, ['ingredients']),
     [run],
   );
 
@@ -177,44 +198,7 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
       run(async () => {
         const { error: e } = await supabase.from('ingredients').delete().eq('id', id);
         return e ? e.message : null;
-      }),
-    [run],
-  );
-
-  const addPrep = useCallback(
-    ({ lines, ...prep }: PrepInput) =>
-      run(async () => {
-        const { data, error: e } = await supabase.from('preps').insert(prep).select('id').single();
-        if (e) return e.message;
-        const withPrepId = lines.map((l) => ({ ...l, prep_id: (data as { id: string }).id }));
-        const { error: lineError } = await supabase.from('prep_lines').insert(withPrepId);
-        return lineError ? lineError.message : null;
-      }),
-    [run],
-  );
-
-  const updatePrep = useCallback(
-    (id: string, { lines, ...prep }: PrepInput) =>
-      run(async () => {
-        const { error: e } = await supabase.from('preps').update(prep).eq('id', id);
-        if (e) return e.message;
-        const { error: deleteError } = await supabase.from('prep_lines').delete().eq('prep_id', id);
-        if (deleteError) return deleteError.message;
-        const withPrepId = lines.map((l) => ({ ...l, prep_id: id }));
-        const { error: lineError } = await supabase.from('prep_lines').insert(withPrepId);
-        return lineError ? lineError.message : null;
-      }),
-    [run],
-  );
-
-  const deletePrep = useCallback(
-    (id: string) =>
-      run(async () => {
-        const { error: lineError } = await supabase.from('prep_lines').delete().eq('prep_id', id);
-        if (lineError) return lineError.message;
-        const { error: e } = await supabase.from('preps').delete().eq('id', id);
-        return e ? e.message : null;
-      }),
+      }, ['ingredients']),
     [run],
   );
 
@@ -223,70 +207,81 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
       run(async () => {
         const { error: e } = await supabase.from('ingredients').insert(rows);
         return e ? e.message : null;
-      }),
+      }, ['ingredients']),
     [run],
   );
 
-  const addRecipe = useCallback(
-    ({ lines, ...recipe }: RecipeInput) =>
+  const savePrep = useCallback(
+    (id: string | null, { lines, ...prep }: PrepInput) =>
       run(async () => {
-        const { data, error: e } = await supabase.from('recipes').insert(recipe).select('id').single();
-        if (e) return e.message;
-        const withRecipeId = lines.map((l) => ({ ...l, recipe_id: (data as { id: string }).id }));
-        const { error: lineError } = await supabase.from('recipe_lines').insert(withRecipeId);
-        return lineError ? lineError.message : null;
-      }),
+        const { error: e } = await supabase.rpc('save_prep', {
+          p_id: id,
+          p_name: prep.name,
+          p_yield_amount: prep.yield_amount,
+          p_yield_unit: prep.yield_unit,
+          p_notes: prep.notes,
+          p_lines: lines,
+        });
+        return e ? e.message : null;
+      }, ['preps', 'prep_lines']),
     [run],
   );
 
-  const updateRecipe = useCallback(
-    (id: string, { lines, ...recipe }: RecipeInput) =>
+  const addPrep = useCallback((v: PrepInput) => savePrep(null, v), [savePrep]);
+  const updatePrep = useCallback((id: string, v: PrepInput) => savePrep(id, v), [savePrep]);
+
+  const deletePrep = useCallback(
+    (id: string) =>
       run(async () => {
-        const { error: e } = await supabase.from('recipes').update(recipe).eq('id', id);
-        if (e) return e.message;
-        const { error: deleteError } = await supabase.from('recipe_lines').delete().eq('recipe_id', id);
-        if (deleteError) return deleteError.message;
-        const withRecipeId = lines.map((l) => ({ ...l, recipe_id: id }));
-        const { error: lineError } = await supabase.from('recipe_lines').insert(withRecipeId);
-        return lineError ? lineError.message : null;
-      }),
+        const { error: e } = await supabase.from('preps').delete().eq('id', id);
+        return e ? e.message : null;
+      }, ['preps', 'prep_lines']),
     [run],
   );
+
+  const saveRecipe = useCallback(
+    (id: string | null, { lines, ...recipe }: RecipeInput) =>
+      run(async () => {
+        const { error: e } = await supabase.rpc('save_recipe', {
+          p_id: id,
+          p_name: recipe.name,
+          p_glass: recipe.glass,
+          p_ice: recipe.ice,
+          p_method: recipe.method,
+          p_price_gross: recipe.price_gross,
+          p_target_cost_pct_override: recipe.target_cost_pct_override,
+          p_notes: recipe.notes,
+          p_description_de: recipe.description_de,
+          p_description_en: recipe.description_en,
+          p_lines: lines,
+        });
+        return e ? e.message : null;
+      }, ['recipes', 'recipe_lines']),
+    [run],
+  );
+
+  const addRecipe = useCallback((v: RecipeInput) => saveRecipe(null, v), [saveRecipe]);
+  const updateRecipe = useCallback((id: string, v: RecipeInput) => saveRecipe(id, v), [saveRecipe]);
 
   const deleteRecipe = useCallback(
     (id: string) =>
       run(async () => {
-        const { error: lineError } = await supabase.from('recipe_lines').delete().eq('recipe_id', id);
-        if (lineError) return lineError.message;
         const { error: e } = await supabase.from('recipes').delete().eq('id', id);
         return e ? e.message : null;
-      }),
+      }, ['recipes', 'recipe_lines']),
     [run],
   );
 
   const duplicateRecipe = useCallback(
     (id: string, newName: string) =>
       run(async () => {
-        const source = library.recipes.find((r) => r.id === id);
-        if (!source) return 'recipe not found';
-        const { id: _id, created_at: _c, updated_at: _u, ...fields } = source;
-        const { data, error: e } = await supabase
-          .from('recipes')
-          .insert({ ...fields, name: newName })
-          .select('id')
-          .single();
-        if (e) return e.message;
-        const copies = library.recipeLines
-          .filter((l) => l.recipe_id === id)
-          .map(({ id: _lid, recipe_id: _rid, ...line }) => ({
-            ...line,
-            recipe_id: (data as { id: string }).id,
-          }));
-        if (copies.length === 0) return null;
-        const { error: lineError } = await supabase.from('recipe_lines').insert(copies);
-        return lineError ? lineError.message : null;
-      }),
-    [run, library],
+        const { error: e } = await supabase.rpc('duplicate_recipe', {
+          p_source: id,
+          p_new_name: newName,
+        });
+        return e ? e.message : null;
+      }, ['recipes', 'recipe_lines']),
+    [run],
   );
 
   const addMenu = useCallback(
@@ -294,7 +289,7 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
       run(async () => {
         const { error: e } = await supabase.from('menus').insert({ name });
         return e ? e.message : null;
-      }),
+      }, ['menus']),
     [run],
   );
 
@@ -303,31 +298,32 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
       run(async () => {
         const { error: e } = await supabase.from('menus').update({ name }).eq('id', id);
         return e ? e.message : null;
-      }),
+      }, ['menus']),
     [run],
   );
 
   const deleteMenu = useCallback(
     (id: string) =>
       run(async () => {
-        const { error: itemError } = await supabase.from('menu_items').delete().eq('menu_id', id);
-        if (itemError) return itemError.message;
+        // menu_items cascade on the menu delete.
         const { error: e } = await supabase.from('menus').delete().eq('id', id);
         return e ? e.message : null;
-      }),
+      }, ['menus', 'menu_items']),
     [run],
   );
 
   const addMenuItem = useCallback(
     (menuId: string, recipeId: string) =>
       run(async () => {
-        const existing = library.menuItems.filter((i) => i.menu_id === menuId);
-        const nextOrder = existing.reduce((max, i) => Math.max(max, i.sort_order), -1) + 1;
+        const orders = library.menuItems
+          .filter((i) => i.menu_id === menuId)
+          .map((i) => i.sort_order);
+        const nextOrder = orders.length === 0 ? 0 : Math.max(...orders) + 1;
         const { error: e } = await supabase
           .from('menu_items')
           .insert({ menu_id: menuId, recipe_id: recipeId, sort_order: nextOrder });
         return e ? e.message : null;
-      }),
+      }, ['menu_items']),
     [run, library],
   );
 
@@ -336,34 +332,20 @@ export function useLibrary(enabled: boolean): UseLibraryResult {
       run(async () => {
         const { error: e } = await supabase.from('menu_items').delete().eq('id', id);
         return e ? e.message : null;
-      }),
+      }, ['menu_items']),
     [run],
   );
 
   const reorderMenuItem = useCallback(
     (id: string, direction: 'up' | 'down') =>
       run(async () => {
-        const item = library.menuItems.find((i) => i.id === id);
-        if (!item) return 'menu item not found';
-        const siblings = library.menuItems
-          .filter((i) => i.menu_id === item.menu_id)
-          .sort((a, b) => a.sort_order - b.sort_order);
-        const index = siblings.findIndex((i) => i.id === id);
-        const neighbourIndex = direction === 'up' ? index - 1 : index + 1;
-        const neighbour = siblings[neighbourIndex];
-        if (!neighbour) return null; // already at an edge
-        const first = await supabase
-          .from('menu_items')
-          .update({ sort_order: neighbour.sort_order })
-          .eq('id', item.id);
-        if (first.error) return first.error.message;
-        const second = await supabase
-          .from('menu_items')
-          .update({ sort_order: item.sort_order })
-          .eq('id', neighbour.id);
-        return second.error ? second.error.message : null;
-      }),
-    [run, library],
+        const { error: e } = await supabase.rpc('reorder_menu_item', {
+          p_id: id,
+          p_direction: direction,
+        });
+        return e ? e.message : null;
+      }, ['menu_items']),
+    [run],
   );
 
   return {

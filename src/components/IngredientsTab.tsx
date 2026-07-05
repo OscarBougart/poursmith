@@ -4,7 +4,7 @@ import type { Category, Ingredient, Library, NewIngredient } from '@/data/types'
 import { CATEGORIES } from '@/data/types';
 import { ingredientUnitCost } from '@/lib/cost';
 import { formatEur, formatNumber, formatPerUnit } from '@/lib/format';
-import { ingredientUsedBy, ingredientUsedByRecipes } from '@/hooks/useLibrary';
+import { ingredientUsedBy, ingredientUsedByRecipes } from '@/lib/usage';
 import { useLocale, useT } from '@/i18n';
 import IngredientForm from '@/components/IngredientForm';
 import SlideOver from '@/components/SlideOver';

@@ -1,26 +1,26 @@
 import { useMemo, useState } from 'react';
 import type { FormEvent, ReactElement } from 'react';
-import type {
-  Library,
-  Method,
-  NewRecipeLine,
-  Recipe,
-  RecipeUnit,
-  Settings,
-  Unit,
-} from '@/data/types';
-import { METHODS, RECIPE_UNITS } from '@/data/types';
+import type { Library, Method, NewRecipeLine, Recipe, RecipeUnit, Settings } from '@/data/types';
+import { METHODS } from '@/data/types';
 import { GLASSES, ICE_TYPES } from '@/data/barLists';
-import { formatEur } from '@/lib/format';
-import { parseDecimal } from '@/lib/parse';
+import { componentName, componentNativeUnit, decodeComponent } from '@/lib/component';
 import { costPct, effectiveTargetPct, grossMarginEur, suggestedPriceGross } from '@/lib/pricing';
+import { parseDecimal } from '@/lib/parse';
 import { recipePourCost } from '@/lib/recipeCost';
-import { isVolumeUnit } from '@/lib/units';
+import { unitCompatible } from '@/lib/units';
 import type { RecipeInput } from '@/hooks/useLibrary';
+import { useLineDrafts } from '@/hooks/useLineDrafts';
 import type { MessageKey } from '@/i18n';
-import { useLocale, useT } from '@/i18n';
-import ConfirmDialog from '@/components/ConfirmDialog';
+import { useT } from '@/i18n';
+import CostPreview from '@/components/CostPreview';
+import type { RecipeCostPreview } from '@/components/CostPreview';
+import ErrorBanner from '@/components/ErrorBanner';
 import Field from '@/components/Field';
+import FormActions from '@/components/FormActions';
+import RecipeLinesEditor from '@/components/RecipeLinesEditor';
+import type { RecipeLineDraft } from '@/components/RecipeLinesEditor';
+import type { LineFieldErrors } from '@/components/PrepLinesEditor';
+import { INPUT_CLASS } from '@/components/formStyles';
 
 export interface RecipeFormProps {
   initial: Recipe | null;
@@ -32,50 +32,13 @@ export interface RecipeFormProps {
   onClose: () => void;
 }
 
-interface LineDraft {
-  key: number;
-  componentKey: string; // '' | 'i:<id>' | 'p:<id>'
-  amount: string;
-  unit: RecipeUnit;
-  is_garnish: boolean;
-}
-
-interface LineErrors {
-  component?: string;
-  amount?: string;
-}
-
-const INPUT_CLASS =
-  'w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-zinc-100 outline-none focus:border-emerald-500';
-
-function nativeUnitOf(componentKey: string, lib: Library): Unit | null {
-  if (componentKey.startsWith('i:')) {
-    return lib.ingredients.find((i) => i.id === componentKey.slice(2))?.unit ?? null;
-  }
-  if (componentKey.startsWith('p:')) {
-    return lib.preps.find((p) => p.id === componentKey.slice(2))?.yield_unit ?? null;
-  }
-  return null;
-}
-
-function componentNameOf(componentKey: string, lib: Library): string {
-  if (componentKey.startsWith('i:')) {
-    return lib.ingredients.find((i) => i.id === componentKey.slice(2))?.name ?? '?';
-  }
-  if (componentKey.startsWith('p:')) {
-    return lib.preps.find((p) => p.id === componentKey.slice(2))?.name ?? '?';
-  }
-  return '?';
-}
-
-function unitCompatible(unit: RecipeUnit, native: Unit | null): boolean {
-  if (native === null) return true; // no component chosen yet — flagged separately
-  if (native === 'ml') return isVolumeUnit(unit);
-  return unit === native;
-}
-
-function toDraft(componentKey: string, unit: RecipeUnit): { componentKey: string; unit: RecipeUnit } {
-  return { componentKey, unit };
+function toNewLine(draft: RecipeLineDraft): NewRecipeLine {
+  return {
+    ...decodeComponent(draft.componentKey),
+    amount: parseDecimal(draft.amount) ?? 0,
+    unit: draft.unit,
+    is_garnish: draft.is_garnish,
+  };
 }
 
 export default function RecipeForm({
@@ -88,7 +51,6 @@ export default function RecipeForm({
   onClose,
 }: RecipeFormProps): ReactElement {
   const t = useT();
-  const { locale } = useLocale();
   const draftId = initial?.id ?? '__draft__';
 
   const [name, setName] = useState(initial?.name ?? '');
@@ -104,74 +66,51 @@ export default function RecipeForm({
   const [notes, setNotes] = useState(initial?.notes ?? '');
   const [descriptionDe, setDescriptionDe] = useState(initial?.description_de ?? '');
   const [descriptionEn, setDescriptionEn] = useState(initial?.description_en ?? '');
-  const [lines, setLines] = useState<LineDraft[]>(() =>
-    initial
-      ? library.recipeLines
-          .filter((l) => l.recipe_id === initial.id)
-          .map((l, index) => ({
-            key: index,
-            componentKey: l.ingredient_id !== null ? `i:${l.ingredient_id}` : `p:${l.component_prep_id ?? ''}`,
-            amount: String(l.amount),
-            unit: l.unit,
-            is_garnish: l.is_garnish,
-          }))
-      : [{ key: 0, componentKey: '', amount: '', unit: 'ml', is_garnish: false }],
+  const drafts = useLineDrafts<RecipeLineDraft>(
+    () =>
+      initial
+        ? library.recipeLines
+            .filter((l) => l.recipe_id === initial.id)
+            .map((l, index) => ({
+              key: index,
+              componentKey: l.ingredient_id !== null ? `i:${l.ingredient_id}` : `p:${l.component_prep_id ?? ''}`,
+              amount: String(l.amount),
+              unit: l.unit,
+              is_garnish: l.is_garnish,
+            }))
+        : [{ key: 0, componentKey: '', amount: '', unit: 'ml', is_garnish: false }],
+    (key) => ({ key, componentKey: '', amount: '', unit: 'ml', is_garnish: false }),
   );
-  const [nextKey, setNextKey] = useState(() => lines.length + 1);
   const [nameError, setNameError] = useState<MessageKey | null>(null);
   const [priceError, setPriceError] = useState<MessageKey | null>(null);
   const [overrideError, setOverrideError] = useState<MessageKey | null>(null);
   const [linesError, setLinesError] = useState<MessageKey | null>(null);
-  const [lineErrors, setLineErrors] = useState<Record<number, LineErrors>>({});
+  const [lineErrors, setLineErrors] = useState<Record<number, LineFieldErrors>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [confirming, setConfirming] = useState(false);
-  const [blockedByUse, setBlockedByUse] = useState(false);
-
-  function updateLine(key: number, patch: Partial<LineDraft>): void {
-    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, ...patch } : l)));
-  }
 
   function selectComponent(key: number, componentKey: string): void {
-    setLines((prev) =>
+    drafts.replace((prev) =>
       prev.map((l) => {
         if (l.key !== key) return l;
-        const native = nativeUnitOf(componentKey, library);
+        const native = componentNativeUnit(componentKey, library);
         const unit = unitCompatible(l.unit, native) ? l.unit : ((native ?? 'ml') as RecipeUnit);
-        return { ...l, ...toDraft(componentKey, unit) };
+        return { ...l, componentKey, unit };
       }),
     );
-  }
-
-  function draftNewLines(): { valid: NewRecipeLine[]; all: number } {
-    const valid: NewRecipeLine[] = [];
-    for (const draft of lines) {
-      const amount = parseDecimal(draft.amount);
-      const native = nativeUnitOf(draft.componentKey, library);
-      if (
-        draft.componentKey !== '' &&
-        amount !== null &&
-        amount > 0 &&
-        native !== null &&
-        unitCompatible(draft.unit, native)
-      ) {
-        valid.push({
-          ingredient_id: draft.componentKey.startsWith('i:') ? draft.componentKey.slice(2) : null,
-          component_prep_id: draft.componentKey.startsWith('p:') ? draft.componentKey.slice(2) : null,
-          amount,
-          unit: draft.unit,
-          is_garnish: draft.is_garnish,
-        });
-      }
-    }
-    return { valid, all: lines.length };
   }
 
   const parsedPrice = priceGross.trim() === '' ? null : parseDecimal(priceGross);
   const parsedOverride = targetOverride.trim() === '' ? null : parseDecimal(targetOverride);
 
-  const preview = useMemo(() => {
-    const { valid } = draftNewLines();
+  const preview = useMemo((): RecipeCostPreview | null => {
+    const valid = drafts.lines
+      .filter((d) => {
+        const native = componentNativeUnit(d.componentKey, library);
+        const amount = parseDecimal(d.amount);
+        return d.componentKey !== '' && amount !== null && amount > 0 && native !== null && unitCompatible(d.unit, native);
+      })
+      .map(toNewLine);
     if (valid.length === 0) return null;
     const hypothetical: Library = {
       ...library,
@@ -199,18 +138,16 @@ export default function RecipeForm({
     };
     try {
       const pourCost = recipePourCost(draftId, hypothetical);
-      const targetPct = effectiveTargetPct(parsedOverride, settings);
       return {
         pourCost,
         pct: costPct(pourCost, parsedPrice),
         margin: grossMarginEur(pourCost, parsedPrice),
-        suggested: suggestedPriceGross(pourCost, targetPct),
+        suggested: suggestedPriceGross(pourCost, effectiveTargetPct(parsedOverride, settings)),
       };
     } catch {
       return null;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lines, library, draftId, name, method, parsedPrice, parsedOverride, settings]);
+  }, [drafts.lines, library, draftId, name, method, parsedPrice, parsedOverride, settings]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -230,33 +167,22 @@ export default function RecipeForm({
         ? 'validation.wasteRange'
         : null;
 
-    const nextLineErrors: Record<number, LineErrors> = {};
+    const nextLineErrors: Record<number, LineFieldErrors> = {};
     const newLines: NewRecipeLine[] = [];
-    for (const draft of lines) {
-      const errors: LineErrors = {};
-      const native = nativeUnitOf(draft.componentKey, library);
+    for (const draft of drafts.lines) {
+      const errs: LineFieldErrors = {};
+      const native = componentNativeUnit(draft.componentKey, library);
       if (draft.componentKey === '') {
-        errors.component = t('validation.required');
+        errs.component = t('validation.required');
       } else if (native !== null && !unitCompatible(draft.unit, native)) {
-        errors.component = t('recipe.unitMismatch', {
-          name: componentNameOf(draft.componentKey, library),
-        });
+        errs.component = t('recipe.unitMismatch', { name: componentName(draft.componentKey, library) });
       }
       const amount = parseDecimal(draft.amount);
-      if (amount === null || amount <= 0) errors.amount = t('validation.positive');
-      if (errors.component || errors.amount) {
-        nextLineErrors[draft.key] = errors;
-      } else if (amount !== null) {
-        newLines.push({
-          ingredient_id: draft.componentKey.startsWith('i:') ? draft.componentKey.slice(2) : null,
-          component_prep_id: draft.componentKey.startsWith('p:') ? draft.componentKey.slice(2) : null,
-          amount,
-          unit: draft.unit,
-          is_garnish: draft.is_garnish,
-        });
-      }
+      if (amount === null || amount <= 0) errs.amount = t('validation.positive');
+      if (errs.component || errs.amount) nextLineErrors[draft.key] = errs;
+      else newLines.push(toNewLine(draft));
     }
-    const nextLinesError: MessageKey | null = lines.length === 0 ? 'prep.linesRequired' : null;
+    const nextLinesError: MessageKey | null = drafts.lines.length === 0 ? 'prep.linesRequired' : null;
 
     setNameError(nextNameError);
     setPriceError(nextPriceError);
@@ -293,7 +219,6 @@ export default function RecipeForm({
 
   async function handleDelete(): Promise<void> {
     if (!onDelete) return;
-    setConfirming(false);
     setPending(true);
     const message = await onDelete();
     setPending(false);
@@ -303,11 +228,7 @@ export default function RecipeForm({
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} noValidate>
-      {serverError !== null && (
-        <p role="alert" className="mb-4 rounded-lg bg-red-950/60 px-3 py-2 text-sm text-red-300">
-          {t('common.error.generic', { message: serverError })}
-        </p>
-      )}
+      {serverError !== null && <ErrorBanner message={serverError} />}
 
       <Field label={t('common.name')} htmlFor="rec-name" error={nameError ? t(nameError) : undefined}>
         <input id="rec-name" type="text" value={name} onChange={(e) => setName(e.target.value)} className={INPUT_CLASS} />
@@ -361,160 +282,33 @@ export default function RecipeForm({
         </Field>
       </div>
 
-      <fieldset className="mb-4">
-        <legend className="mb-2 block text-sm text-zinc-400">{t('prep.components')}</legend>
-        {linesError !== null && (
-          <p role="alert" className="mb-2 text-xs text-red-400">{t(linesError)}</p>
-        )}
-        <div className="flex flex-col gap-2">
-          {lines.map((line) => {
-            const errors = lineErrors[line.key];
-            return (
-              <div key={line.key} className="flex items-start gap-2">
-                <div className="flex-1">
-                  <select
-                    value={line.componentKey}
-                    onChange={(e) => selectComponent(line.key, e.target.value)}
-                    aria-label={t('prep.component')}
-                    className={INPUT_CLASS}
-                  >
-                    <option value="">{t('prep.component')} …</option>
-                    <optgroup label={t('nav.ingredients')}>
-                      {library.ingredients.map((i) => (
-                        <option key={i.id} value={`i:${i.id}`}>{i.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label={t('nav.preps')}>
-                      {library.preps.map((p) => (
-                        <option key={p.id} value={`p:${p.id}`}>{p.name}</option>
-                      ))}
-                    </optgroup>
-                  </select>
-                  {errors?.component && (
-                    <p role="alert" className="mt-1 text-xs text-red-400">{errors.component}</p>
-                  )}
-                </div>
-                <div className="w-20">
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={line.amount}
-                    onChange={(e) => updateLine(line.key, { amount: e.target.value })}
-                    aria-label={t('prep.amount')}
-                    className={INPUT_CLASS}
-                  />
-                  {errors?.amount && (
-                    <p role="alert" className="mt-1 text-xs text-red-400">{errors.amount}</p>
-                  )}
-                </div>
-                <select
-                  value={line.unit}
-                  onChange={(e) => updateLine(line.key, { unit: e.target.value as RecipeUnit })}
-                  aria-label={t('ingredient.unit')}
-                  className="w-24 rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-2 text-zinc-100 outline-none focus:border-emerald-500"
-                >
-                  {RECIPE_UNITS.map((u) => (
-                    <option key={u} value={u}>{t(`unit.${u}`)}</option>
-                  ))}
-                </select>
-                <label className="mt-2.5 flex shrink-0 items-center gap-1 text-xs text-zinc-400">
-                  <input
-                    type="checkbox"
-                    checked={line.is_garnish}
-                    onChange={(e) => updateLine(line.key, { is_garnish: e.target.checked })}
-                    className="accent-emerald-600"
-                  />
-                  {t('recipe.garnish')}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setLines((prev) => prev.filter((l) => l.key !== line.key))}
-                  aria-label={`${t('common.delete')}: ${componentNameOf(line.componentKey, library)}`}
-                  className="mt-1 rounded p-1 text-lg leading-none text-zinc-500 transition hover:text-red-400"
-                >
-                  ×
-                </button>
-              </div>
-            );
-          })}
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            setLines((prev) => [...prev, { key: nextKey, componentKey: '', amount: '', unit: 'ml', is_garnish: false }]);
-            setNextKey((k) => k + 1);
-          }}
-          className="mt-2 rounded-lg border border-dashed border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800"
-        >
-          + {t('prep.addLine')}
-        </button>
-      </fieldset>
+      <RecipeLinesEditor
+        lines={drafts.lines}
+        library={library}
+        errors={lineErrors}
+        linesError={linesError ? t(linesError) : undefined}
+        onSelectComponent={selectComponent}
+        onUpdate={drafts.update}
+        onRemove={drafts.remove}
+        onAdd={drafts.add}
+      />
 
-      <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 text-sm">
-        <dt className="text-zinc-400">{t('recipe.pourCost')}</dt>
-        <dd className="text-right font-medium text-emerald-400">
-          {preview !== null ? formatEur(preview.pourCost, locale) : '—'}
-        </dd>
-        <dt className="text-zinc-400">{t('recipe.costPct')}</dt>
-        <dd className="text-right text-zinc-200">
-          {preview?.pct != null ? `${(preview.pct * 100).toFixed(1)} %` : '—'}
-        </dd>
-        <dt className="text-zinc-400">{t('recipe.margin')}</dt>
-        <dd className="text-right text-zinc-200">
-          {preview?.margin != null ? formatEur(preview.margin, locale) : '—'}
-        </dd>
-        <dt className="text-zinc-400">{t('recipe.suggestedPrice')}</dt>
-        <dd className="text-right font-medium text-zinc-100">
-          {preview !== null ? formatEur(preview.suggested, locale) : '—'}
-        </dd>
-      </dl>
+      <CostPreview preview={preview} />
 
-      {blockedByUse && (
-        <p role="alert" className="mb-4 rounded-lg bg-amber-950/60 px-3 py-2 text-sm text-amber-300">
-          {t('menu.inUse', { names: usedByNames.join(', ') })}
-        </p>
-      )}
-
-      <div className="mt-6 flex items-center justify-between gap-3">
-        {initial && onDelete ? (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => (usedByNames.length > 0 ? setBlockedByUse(true) : setConfirming(true))}
-            className="rounded-lg border border-red-900 px-4 py-2 text-sm text-red-400 transition hover:bg-red-950/50"
-          >
-            {t('common.delete')}
-          </button>
-        ) : (
-          <span />
-        )}
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
-          >
-            {t('common.cancel')}
-          </button>
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:opacity-60"
-          >
-            {pending ? t('common.saving') : t('common.save')}
-          </button>
-        </div>
-      </div>
-
-      {confirming && initial && (
-        <ConfirmDialog
-          title={t('common.delete')}
-          message={t('recipe.deleteConfirm', { name: initial.name })}
-          confirmLabel={t('common.delete')}
-          onConfirm={() => void handleDelete()}
-          onCancel={() => setConfirming(false)}
-        />
-      )}
+      <FormActions
+        pending={pending}
+        onCancel={onClose}
+        onDelete={
+          initial && onDelete
+            ? {
+                usedByNames,
+                inUseMessage: t('menu.inUse', { names: usedByNames.join(', ') }),
+                confirmMessage: t('recipe.deleteConfirm', { name: initial.name }),
+                run: () => void handleDelete(),
+              }
+            : undefined
+        }
+      />
     </form>
   );
 }

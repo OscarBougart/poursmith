@@ -1,4 +1,6 @@
 import type { Ingredient, Library } from '@/data/types';
+import { indexLibrary } from '@/lib/libraryIndex';
+import type { LibraryIndex } from '@/lib/libraryIndex';
 
 export class CostError extends Error {
   readonly code: 'cycle' | 'missing';
@@ -17,19 +19,20 @@ export function ingredientUnitCost(ingredient: Ingredient): number {
 
 /** € per yield unit of a prep, resolving nested preps recursively. */
 export function prepUnitCost(prepId: string, lib: Library): number {
-  return resolve(prepId, lib, new Map(), new Set());
+  return resolve(prepId, indexLibrary(lib), new Map(), new Set());
 }
 
 /** Cost of one full batch of a prep (unit cost × yield). */
 export function prepTotalCost(prepId: string, lib: Library): number {
-  const prep = lib.preps.find((p) => p.id === prepId);
+  const idx = indexLibrary(lib);
+  const prep = idx.prep(prepId);
   if (!prep) throw new CostError(`Unknown prep: ${prepId}`, 'missing');
-  return prepUnitCost(prepId, lib) * prep.yield_amount;
+  return resolve(prepId, idx, new Map(), new Set()) * prep.yield_amount;
 }
 
 function resolve(
   prepId: string,
-  lib: Library,
+  idx: LibraryIndex,
   memo: Map<string, number>,
   visiting: Set<string>,
 ): number {
@@ -38,21 +41,18 @@ function resolve(
   if (visiting.has(prepId)) {
     throw new CostError(`Circular prep reference involving: ${prepId}`, 'cycle');
   }
-  const prep = lib.preps.find((p) => p.id === prepId);
+  const prep = idx.prep(prepId);
   if (!prep) throw new CostError(`Unknown prep: ${prepId}`, 'missing');
 
   visiting.add(prepId);
   let total = 0;
-  for (const line of lib.prepLines) {
-    if (line.prep_id !== prepId) continue;
+  for (const line of idx.prepLinesOf(prepId)) {
     if (line.ingredient_id !== null) {
-      const ingredient = lib.ingredients.find((i) => i.id === line.ingredient_id);
-      if (!ingredient) {
-        throw new CostError(`Unknown ingredient: ${line.ingredient_id}`, 'missing');
-      }
+      const ingredient = idx.ingredient(line.ingredient_id);
+      if (!ingredient) throw new CostError(`Unknown ingredient: ${line.ingredient_id}`, 'missing');
       total += line.amount * ingredientUnitCost(ingredient);
     } else if (line.component_prep_id !== null) {
-      total += line.amount * resolve(line.component_prep_id, lib, memo, visiting);
+      total += line.amount * resolve(line.component_prep_id, idx, memo, visiting);
     }
   }
   visiting.delete(prepId);
@@ -65,18 +65,16 @@ function resolve(
 /** True if making componentPrepId a component of prepId would close a loop. */
 export function wouldCreateCycle(prepId: string, componentPrepId: string, lib: Library): boolean {
   if (prepId === componentPrepId) return true;
+  const idx = indexLibrary(lib);
   const stack = [componentPrepId];
   const seen = new Set<string>();
   while (stack.length > 0) {
-    const current = stack.pop();
-    if (current === undefined) break;
+    const current = stack.pop() as string;
     if (current === prepId) return true;
     if (seen.has(current)) continue;
     seen.add(current);
-    for (const line of lib.prepLines) {
-      if (line.prep_id === current && line.component_prep_id !== null) {
-        stack.push(line.component_prep_id);
-      }
+    for (const line of idx.prepLinesOf(current)) {
+      if (line.component_prep_id !== null) stack.push(line.component_prep_id);
     }
   }
   return false;

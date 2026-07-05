@@ -15,12 +15,17 @@ export function useAuth(): UseAuthResult {
 
   useEffect(() => {
     let cancelled = false;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!cancelled) {
-        setSession(data.session);
-        setReady(true);
-      }
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!cancelled) setSession(data.session);
+      })
+      .catch(() => {
+        // treat a failed session lookup as signed-out rather than hanging
+      })
+      .finally(() => {
+        if (!cancelled) setReady(true);
+      });
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
       setReady(true);

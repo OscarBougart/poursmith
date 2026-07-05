@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import type { Library, Menu, Settings } from '@/data/types';
-import { formatEur } from '@/lib/format';
-import { menuAnalytics } from '@/lib/menuAnalytics';
+import { formatEur, formatPercent } from '@/lib/format';
+import { menuAnalytics, worstOffenderName } from '@/lib/menuAnalytics';
 import { useLocale, useT } from '@/i18n';
 
 export interface InternalMenuViewProps {
@@ -19,10 +19,7 @@ export default function InternalMenuView({
   const t = useT();
   const { locale } = useLocale();
   const analytics = menuAnalytics(menu.id, library, settings);
-  const worstOffenderName =
-    analytics.worstOffenderId !== null
-      ? (library.recipes.find((r) => r.id === analytics.worstOffenderId)?.name ?? t('menu.none'))
-      : t('menu.none');
+  const worstName = worstOffenderName(analytics, library, t('menu.none'));
 
   return (
     <div className="print-area hidden print:block">
@@ -47,7 +44,7 @@ export default function InternalMenuView({
               </td>
               <td className="py-2 pr-3">{formatEur(row.pourCost, locale)}</td>
               <td className="py-2 pr-3">
-                {row.costPct !== null ? `${(row.costPct * 100).toFixed(1)} %` : '—'}
+                {row.costPct !== null ? formatPercent(row.costPct, locale) : '—'}
               </td>
               <td className="py-2 pr-3">
                 {row.marginEur !== null ? formatEur(row.marginEur, locale) : '—'}
@@ -63,7 +60,7 @@ export default function InternalMenuView({
       <dl className="grid max-w-md grid-cols-2 gap-y-1 text-sm">
         <dt>{t('menu.avgCostPct')}</dt>
         <dd className="text-right">
-          {analytics.avgCostPct !== null ? `${(analytics.avgCostPct * 100).toFixed(1)} %` : t('menu.none')}
+          {analytics.avgCostPct !== null ? formatPercent(analytics.avgCostPct, locale) : t('menu.none')}
         </dd>
         <dt>{t('menu.marginSpread')}</dt>
         <dd className="text-right">
@@ -72,7 +69,7 @@ export default function InternalMenuView({
             : t('menu.none')}
         </dd>
         <dt>{t('menu.worstOffender')}</dt>
-        <dd className="text-right">{worstOffenderName}</dd>
+        <dd className="text-right">{worstName}</dd>
       </dl>
     </div>
   );
