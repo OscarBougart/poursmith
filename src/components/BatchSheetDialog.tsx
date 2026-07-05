@@ -64,7 +64,7 @@ export default function BatchSheetDialog({
             aria-pressed={mode === m}
             className={`rounded-lg border px-3 py-2 text-sm transition ${
               mode === m
-                ? 'border-emerald-500 bg-accent/15 text-emerald-300'
+                ? 'border-accent bg-accent/15 text-zinc-100'
                 : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
             }`}
           >
@@ -137,7 +137,7 @@ export default function BatchSheetDialog({
             <dt className="text-zinc-400 print:text-black">{t('batch.totalCost')}</dt>
             <dd className="text-right text-zinc-200 print:text-black">{formatEur(sheet.totalCost, locale)}</dd>
             <dt className="text-zinc-400 print:text-black">{t('batch.costPerServe')}</dt>
-            <dd className="text-right font-medium text-emerald-400 print:text-black">
+            <dd className="text-right font-medium text-positive print:text-black">
               {formatEur(sheet.costPerServe, locale)}
             </dd>
           </dl>

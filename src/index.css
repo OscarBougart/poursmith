@@ -16,8 +16,16 @@
   --color-ink-soft: #e4e4e7; /* secondary text */
   --color-ink-muted: #a1a1aa; /* muted text — ≥4.5:1 on canvas & surface */
 
-  --color-accent: #059669; /* primary actions, selection, positive state */
-  --color-accent-hover: #10b981;
+  /* Interactive brand accent. Violet, deliberately outside the green/amber/red
+     axis those are reserved for cost semantics below. Re-theme in one line. */
+  --color-accent: #7c3aed; /* primary actions, selection, focus */
+  --color-accent-hover: #8b5cf6;
+
+  /* Value & state colours — kept off the interactive accent. */
+  --color-positive: #34d399; /* money / healthy cost figures */
+  --color-success: #10b981; /* RAG: on target */
+  --color-warning: #f59e0b; /* RAG: approaching target */
+  --color-danger: #ef4444; /* RAG: over target */
 }
 
 body {

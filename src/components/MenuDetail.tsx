@@ -20,9 +20,9 @@ export interface MenuDetailProps {
 }
 
 const FLAG_DOT: Record<RagFlag, string> = {
-  green: 'bg-emerald-500',
-  amber: 'bg-amber-500',
-  red: 'bg-red-500',
+  green: 'bg-success',
+  amber: 'bg-warning',
+  red: 'bg-danger',
   unpriced: 'bg-zinc-600',
 };
 
@@ -72,7 +72,7 @@ export default function MenuDetail({
           type="button"
           onClick={() => setSortKey(key)}
           aria-pressed={sortKey === key}
-          className={`transition hover:text-zinc-200 ${sortKey === key ? 'text-emerald-400' : ''}`}
+          className={`transition hover:text-zinc-200 ${sortKey === key ? 'text-positive' : ''}`}
         >
           {label} {sortKey === key ? '↑' : ''}
         </button>
@@ -174,7 +174,7 @@ export default function MenuDetail({
                     <td className="px-4 py-3 text-zinc-300">
                       {row.priceGross !== null ? formatEur(row.priceGross, locale) : t('menu.unpriced')}
                     </td>
-                    <td className="px-4 py-3 text-emerald-400">{formatEur(row.pourCost, locale)}</td>
+                    <td className="px-4 py-3 text-positive">{formatEur(row.pourCost, locale)}</td>
                     <td className="px-4 py-3 text-zinc-300">
                       {row.costPct !== null ? formatPercent(row.costPct, locale) : '—'}
                     </td>

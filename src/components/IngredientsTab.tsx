@@ -136,7 +136,7 @@ export default function IngredientsTab({
                   <td className="px-4 py-3 text-zinc-400">
                     {formatNumber(ingredient.waste_pct, locale)} %
                   </td>
-                  <td className="px-4 py-3 font-medium text-emerald-400">
+                  <td className="px-4 py-3 font-medium text-positive">
                     {formatPerUnit(ingredientUnitCost(ingredient), t(`unit.${ingredient.unit}`), locale)}
                   </td>
                 </tr>

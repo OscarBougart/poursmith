@@ -230,7 +230,7 @@ export default function PrepForm({
 
       <p className="mb-4 text-sm text-zinc-400">
         {t('prep.unitCost')}:{' '}
-        <span className="font-medium text-emerald-400">
+        <span className="font-medium text-positive">
           {preview !== null ? formatPerUnit(preview, t(`unit.${yieldUnit}`), locale) : '—'}
         </span>
       </p>

@@ -120,7 +120,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
               role="tab"
               className={`border-b-2 px-4 py-2.5 text-sm font-medium transition ${
                 tab === id
-                  ? 'border-emerald-500 text-zinc-50'
+                  ? 'border-accent text-zinc-50'
                   : 'border-transparent text-zinc-400 hover:text-zinc-200'
               }`}
             >

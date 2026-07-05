@@ -16,7 +16,7 @@ export default function CostPreview({ preview }: { preview: RecipeCostPreview | 
   return (
     <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 text-sm">
       <dt className="text-zinc-400">{t('recipe.pourCost')}</dt>
-      <dd className="text-right font-medium text-emerald-400">
+      <dd className="text-right font-medium text-positive">
         {preview !== null ? formatEur(preview.pourCost, locale) : '—'}
       </dd>
       <dt className="text-zinc-400">{t('recipe.costPct')}</dt>

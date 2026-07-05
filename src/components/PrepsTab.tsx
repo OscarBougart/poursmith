@@ -130,7 +130,7 @@ export default function PrepsTab({
                       <td className="px-4 py-3 text-zinc-300">
                         {formatNumber(prep.yield_amount, locale)} {t(`unit.${prep.yield_unit}`)}
                       </td>
-                      <td className="px-4 py-3 font-medium text-emerald-400">
+                      <td className="px-4 py-3 font-medium text-positive">
                         {unitCost !== null
                           ? formatPerUnit(unitCost, t(`unit.${prep.yield_unit}`), locale)
                           : '—'}

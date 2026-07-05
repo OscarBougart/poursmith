@@ -109,7 +109,7 @@ export default function MenusTab({
                   <div
                     className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm transition ${
                       selectedId === menu.id
-                        ? 'border-emerald-600 bg-accent/10 text-zinc-50'
+                        ? 'border-accent bg-accent/10 text-zinc-50'
                         : 'border-zinc-800 text-zinc-300 hover:bg-zinc-900'
                     }`}
                   >

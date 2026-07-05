@@ -112,7 +112,7 @@ export default function RecipesTab({
                     <td className="px-4 py-3 text-zinc-300">
                       {recipe.price_gross != null ? formatEur(recipe.price_gross, locale) : '—'}
                     </td>
-                    <td className="px-4 py-3 font-medium text-emerald-400">
+                    <td className="px-4 py-3 font-medium text-positive">
                       {pourCost !== null ? formatEur(pourCost, locale) : '—'}
                     </td>
                     <td className="px-4 py-3 text-zinc-300">
