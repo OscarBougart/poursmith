@@ -7,6 +7,7 @@ import { formatEur, formatNumber, formatPerUnit } from '@/lib/format';
 import type { PrepInput } from '@/hooks/useLibrary';
 import { prepUsedBy, prepUsedByRecipes } from '@/lib/usage';
 import { useLocale, useT } from '@/i18n';
+import { ICON_BUTTON } from '@/components/buttonStyles';
 import PrepForm from '@/components/PrepForm';
 import SlideOver from '@/components/SlideOver';
 
@@ -75,20 +76,20 @@ export default function PrepsTab({
         <button
           type="button"
           onClick={() => setEditing({ mode: 'new' })}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
+          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-hover"
         >
           {t('prep.add')}
         </button>
       </div>
 
       {library.preps.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-500">
+        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-400">
           {t('prep.empty')}
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-zinc-800">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-500">
+            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-400">
               <tr>
                 <th className="w-10 px-2 py-3" />
                 <th className="px-4 py-3">{t('common.name')}</th>
@@ -112,7 +113,7 @@ export default function PrepsTab({
                           onClick={() => toggle(prep.id)}
                           aria-expanded={isOpen}
                           aria-label={`${t('prep.components')}: ${prep.name}`}
-                          className="rounded p-1 text-zinc-400 transition hover:text-zinc-100"
+                          className={ICON_BUTTON}
                         >
                           {isOpen ? '▾' : '▸'}
                         </button>

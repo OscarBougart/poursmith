@@ -75,7 +75,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <header className="border-b border-zinc-800 print:hidden">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
           <h1 className="text-xl font-semibold tracking-tight">{t('app.title')}</h1>
           <div className="flex items-center gap-3">
             <button
@@ -142,7 +142,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
           />
         )}
         {loading ? (
-          <p className="p-10 text-center text-sm text-zinc-500">{t('app.loading')}</p>
+          <p className="p-10 text-center text-sm text-zinc-400">{t('app.loading')}</p>
         ) : tab === 'ingredients' ? (
           <IngredientsTab
             library={library}

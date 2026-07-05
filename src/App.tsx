@@ -11,7 +11,7 @@ function AuthGate(): ReactElement {
   if (!ready) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-zinc-950">
-        <p className="text-sm text-zinc-500">{t('app.loading')}</p>
+        <p className="text-sm text-zinc-400">{t('app.loading')}</p>
       </main>
     );
   }

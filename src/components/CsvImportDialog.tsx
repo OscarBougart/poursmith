@@ -119,7 +119,7 @@ export default function CsvImportDialog({
           {result.valid.length > 0 && (
             <div className="mb-4 max-h-64 overflow-y-auto rounded-lg border border-zinc-800">
               <table className="w-full text-left text-xs">
-                <thead className="bg-zinc-900 text-zinc-500">
+                <thead className="bg-zinc-900 text-zinc-400">
                   <tr>
                     <th className="px-3 py-2">{t('common.name')}</th>
                     <th className="px-3 py-2">{t('ingredient.category')}</th>
@@ -149,7 +149,7 @@ export default function CsvImportDialog({
             type="button"
             disabled={pending || result.valid.length === 0}
             onClick={() => void handleImport()}
-            className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:opacity-50"
+            className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition hover:bg-accent-hover disabled:opacity-50"
           >
             {pending ? t('common.saving') : t('csv.importValid', { n: result.valid.length })}
           </button>

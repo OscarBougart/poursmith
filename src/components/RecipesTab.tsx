@@ -60,20 +60,20 @@ export default function RecipesTab({
         <button
           type="button"
           onClick={() => setEditing({ mode: 'new' })}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
+          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-hover"
         >
           {t('recipe.add')}
         </button>
       </div>
 
       {library.recipes.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-500">
+        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-400">
           {t('recipe.empty')}
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-zinc-800">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-500">
+            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-400">
               <tr>
                 <th className="px-4 py-3">{t('common.name')}</th>
                 <th className="px-4 py-3">{t('recipe.glass')}</th>

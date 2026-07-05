@@ -59,8 +59,8 @@ export default function PrepLinesEditor({
               ? [...selectablePreps, ...library.preps.filter((p) => p.id === selectedPrepId)]
               : selectablePreps;
           return (
-            <div key={line.key} className="flex items-start gap-2">
-              <div className="flex-1">
+            <div key={line.key} className="flex flex-wrap items-start gap-2">
+              <div className="w-full min-w-0 sm:w-auto sm:flex-1">
                 <select
                   value={line.componentKey}
                   onChange={(e) => onUpdate(line.key, { componentKey: e.target.value })}
@@ -96,7 +96,7 @@ export default function PrepLinesEditor({
                 />
                 {errs?.amount && <p role="alert" className="mt-1 text-xs text-red-400">{errs.amount}</p>}
               </div>
-              <span className="mt-2.5 w-10 shrink-0 text-sm text-zinc-500">
+              <span className="mt-2.5 w-10 shrink-0 text-sm text-zinc-400">
                 {nativeUnit !== null ? t(`unit.${nativeUnit}`) : ''}
               </span>
               <button
@@ -105,7 +105,7 @@ export default function PrepLinesEditor({
                 aria-label={`${t('common.delete')}: ${
                   line.componentKey === '' ? t('prep.component') : componentName(line.componentKey, library)
                 }`}
-                className="mt-1 rounded p-1 text-lg leading-none text-zinc-500 transition hover:text-red-400"
+                className="mt-1 rounded p-1 text-lg leading-none text-zinc-400 transition hover:text-red-400"
               >
                 ×
               </button>

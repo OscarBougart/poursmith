@@ -5,6 +5,7 @@ import { formatEur, formatPercent } from '@/lib/format';
 import type { MenuSortKey, RagFlag } from '@/lib/menuAnalytics';
 import { menuAnalytics, sortMenuRows, worstOffenderName } from '@/lib/menuAnalytics';
 import { useLocale, useT } from '@/i18n';
+import { ICON_BUTTON, ICON_BUTTON_DANGER } from '@/components/buttonStyles';
 
 export interface MenuDetailProps {
   menu: Menu;
@@ -88,7 +89,7 @@ export default function MenuDetail({
             value={guestLang}
             onChange={(e) => setGuestLang(e.target.value as Locale)}
             aria-label={t('menu.language')}
-            className="rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-sm text-zinc-100 outline-none focus:border-emerald-500"
+            className="rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent"
           >
             <option value="de">DE</option>
             <option value="en">EN</option>
@@ -105,15 +106,15 @@ export default function MenuDetail({
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-3 gap-3">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
-          <p className="text-xs text-zinc-500">{t('menu.avgCostPct')}</p>
+          <p className="text-xs text-zinc-400">{t('menu.avgCostPct')}</p>
           <p className="text-lg font-medium text-zinc-100">
             {analytics.avgCostPct !== null ? formatPercent(analytics.avgCostPct, locale) : t('menu.none')}
           </p>
         </div>
         <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
-          <p className="text-xs text-zinc-500">{t('menu.marginSpread')}</p>
+          <p className="text-xs text-zinc-400">{t('menu.marginSpread')}</p>
           <p className="text-lg font-medium text-zinc-100">
             {analytics.marginSpread !== null
               ? `${formatEur(analytics.marginSpread.min, locale)} – ${formatEur(analytics.marginSpread.max, locale)}`
@@ -121,7 +122,7 @@ export default function MenuDetail({
           </p>
         </div>
         <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
-          <p className="text-xs text-zinc-500">{t('menu.worstOffender')}</p>
+          <p className="text-xs text-zinc-400">{t('menu.worstOffender')}</p>
           <p className="text-lg font-medium text-zinc-100">{worstName}</p>
         </div>
       </div>
@@ -133,7 +134,7 @@ export default function MenuDetail({
           onChange={(e) => {
             if (e.target.value !== '') void onAddItem(e.target.value);
           }}
-          className="w-64 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-500"
+          className="w-64 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
         >
           <option value="">{t('menu.pick')}</option>
           {availableRecipes.map((r) => (
@@ -143,13 +144,13 @@ export default function MenuDetail({
       </div>
 
       {analytics.rows.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-500">
+        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-400">
           {t('menu.empty')}
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-zinc-800">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-500">
+            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-400">
               <tr>
                 <th className="w-8 px-2 py-3" />
                 {header('order', t('menu.drink'))}
@@ -189,7 +190,7 @@ export default function MenuDetail({
                               onClick={() => void onReorder(itemId, 'up')}
                               disabled={index === 0}
                               aria-label={t('menu.moveUp')}
-                              className="rounded p-1 text-zinc-400 transition hover:text-zinc-100 disabled:opacity-30"
+                              className={ICON_BUTTON}
                             >
                               ↑
                             </button>
@@ -198,7 +199,7 @@ export default function MenuDetail({
                               onClick={() => void onReorder(itemId, 'down')}
                               disabled={index === sortedRows.length - 1}
                               aria-label={t('menu.moveDown')}
-                              className="rounded p-1 text-zinc-400 transition hover:text-zinc-100 disabled:opacity-30"
+                              className={ICON_BUTTON}
                             >
                               ↓
                             </button>
@@ -209,7 +210,7 @@ export default function MenuDetail({
                             type="button"
                             onClick={() => void onRemoveItem(itemId)}
                             aria-label={`${t('menu.removeRecipe')}: ${row.recipe.name}`}
-                            className="rounded p-1 text-zinc-500 transition hover:text-red-400"
+                            className={ICON_BUTTON_DANGER}
                           >
                             ×
                           </button>

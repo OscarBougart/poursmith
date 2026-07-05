@@ -234,7 +234,7 @@ export default function RecipeForm({
         <input id="rec-name" type="text" value={name} onChange={(e) => setName(e.target.value)} className={INPUT_CLASS} />
       </Field>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Field label={t('recipe.glass')} htmlFor="rec-glass">
           <select id="rec-glass" value={glass} onChange={(e) => setGlass(e.target.value)} className={INPUT_CLASS}>
             <option value="">—</option>
@@ -260,7 +260,7 @@ export default function RecipeForm({
         </Field>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label={t('recipe.priceGross')} htmlFor="rec-price" error={priceError ? t(priceError) : undefined}>
           <input id="rec-price" type="text" inputMode="decimal" value={priceGross} onChange={(e) => setPriceGross(e.target.value)} className={INPUT_CLASS} />
         </Field>
@@ -273,7 +273,7 @@ export default function RecipeForm({
         <textarea id="rec-notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={INPUT_CLASS} />
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label={t('recipe.descriptionDe')} htmlFor="rec-desc-de">
           <textarea id="rec-desc-de" value={descriptionDe} onChange={(e) => setDescriptionDe(e.target.value)} rows={2} className={INPUT_CLASS} />
         </Field>

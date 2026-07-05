@@ -49,8 +49,8 @@ export default function RecipeLinesEditor({
         {lines.map((line) => {
           const errs = errors[line.key];
           return (
-            <div key={line.key} className="flex items-start gap-2">
-              <div className="flex-1">
+            <div key={line.key} className="flex flex-wrap items-start gap-2">
+              <div className="w-full min-w-0 sm:w-auto sm:flex-1">
                 <select
                   value={line.componentKey}
                   onChange={(e) => onSelectComponent(line.key, e.target.value)}
@@ -90,7 +90,7 @@ export default function RecipeLinesEditor({
                 value={line.unit}
                 onChange={(e) => onUpdate(line.key, { unit: e.target.value as RecipeUnit })}
                 aria-label={t('ingredient.unit')}
-                className="w-24 rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-2 text-zinc-100 outline-none focus:border-emerald-500"
+                className="w-24 rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-2 text-zinc-100 outline-none focus:border-accent"
               >
                 {RECIPE_UNITS.map((u) => (
                   <option key={u} value={u}>
@@ -113,7 +113,7 @@ export default function RecipeLinesEditor({
                 aria-label={`${t('common.delete')}: ${
                   line.componentKey === '' ? t('prep.component') : componentName(line.componentKey, library)
                 }`}
-                className="mt-1 rounded p-1 text-lg leading-none text-zinc-500 transition hover:text-red-400"
+                className="mt-1 rounded p-1 text-lg leading-none text-zinc-400 transition hover:text-red-400"
               >
                 ×
               </button>

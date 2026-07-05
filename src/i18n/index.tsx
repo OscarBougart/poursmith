@@ -30,6 +30,7 @@ function readStoredLocale(): Locale {
 export function LocaleProvider({ children }: { children: ReactNode }): ReactElement {
   const [locale, setLocale] = useState<Locale>(readStoredLocale);
   useEffect(() => {
+    document.documentElement.lang = locale;
     try {
       localStorage.setItem(STORAGE_KEY, locale);
     } catch {

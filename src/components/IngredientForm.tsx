@@ -118,7 +118,7 @@ export default function IngredientForm({
         </select>
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field
           label={t('ingredient.packSize')}
           htmlFor="ing-pack"
@@ -149,7 +149,7 @@ export default function IngredientForm({
         </Field>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field
           label={t('ingredient.priceGross')}
           htmlFor="ing-gross"

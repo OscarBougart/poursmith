@@ -17,7 +17,7 @@ export interface BatchSheetDialogProps {
 type Mode = 'serves' | 'volume';
 
 const INPUT_CLASS =
-  'w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-zinc-100 outline-none focus:border-emerald-500';
+  'w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-zinc-100 outline-none focus:border-accent';
 
 export default function BatchSheetDialog({
   recipe,
@@ -64,7 +64,7 @@ export default function BatchSheetDialog({
             aria-pressed={mode === m}
             className={`rounded-lg border px-3 py-2 text-sm transition ${
               mode === m
-                ? 'border-emerald-500 bg-emerald-600/15 text-emerald-300'
+                ? 'border-emerald-500 bg-accent/15 text-emerald-300'
                 : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
             }`}
           >
@@ -73,7 +73,7 @@ export default function BatchSheetDialog({
         ))}
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-4 print:hidden">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 print:hidden">
         {mode === 'serves' ? (
           <div>
             <label htmlFor="batch-serves" className="mb-1 block text-sm text-zinc-400">
@@ -111,7 +111,7 @@ export default function BatchSheetDialog({
                   <td className="py-2 text-right text-zinc-300 print:text-black">
                     {formatNumber(line.amount, locale)} {t(`unit.${line.unit}`)}
                     {line.amountMl !== null && line.unit !== 'ml' && (
-                      <span className="text-zinc-500"> ({formatNumber(line.amountMl, locale)} ml)</span>
+                      <span className="text-zinc-400"> ({formatNumber(line.amountMl, locale)} ml)</span>
                     )}
                   </td>
                   <td className="py-2 text-right text-zinc-400 print:text-black">

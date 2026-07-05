@@ -59,13 +59,13 @@ export default function IngredientsTab({
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('common.search')}
           aria-label={t('common.search')}
-          className="w-56 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-500"
+          className="w-56 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
         />
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as Category | 'all')}
           aria-label={t('ingredient.category')}
-          className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-500"
+          className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
         >
           <option value="all">{t('common.all')}</option>
           {CATEGORIES.map((c) => (
@@ -85,7 +85,7 @@ export default function IngredientsTab({
           <button
             type="button"
             onClick={() => setEditing({ mode: 'new' })}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-hover"
           >
             {t('ingredient.add')}
           </button>
@@ -93,13 +93,13 @@ export default function IngredientsTab({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-500">
+        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-400">
           {t('ingredient.empty')}
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-zinc-800">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-500">
+            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-400">
               <tr>
                 <th className="px-4 py-3">{t('common.name')}</th>
                 <th className="px-4 py-3">{t('ingredient.category')}</th>
