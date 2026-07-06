@@ -80,8 +80,8 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <header className="border-b border-zinc-800 print:hidden">
+    <div className="min-h-screen bg-bg-primary text-text-primary">
+      <header className="border-b border-border print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
           <h1 className="text-xl font-semibold tracking-tight">{t('app.title')}</h1>
           <div className="flex items-center gap-3">
@@ -89,11 +89,11 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
               type="button"
               onClick={() => setSettingsOpen(true)}
               aria-label={t('settings.title')}
-              className="rounded-lg border border-zinc-700 px-2.5 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800"
+              className="rounded-lg border border-border px-2.5 py-1.5 text-sm text-text-secondary transition hover:bg-bg-elevated"
             >
               ⚙
             </button>
-            <div role="group" aria-label="Sprache / Language" className="flex rounded-lg border border-zinc-700 p-0.5">
+            <div role="group" aria-label="Sprache / Language" className="flex rounded-lg border border-border p-0.5">
               {LOCALES.map((l) => (
                 <button
                   key={l}
@@ -101,7 +101,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
                   onClick={() => setLocale(l)}
                   aria-pressed={locale === l}
                   className={`rounded-md px-2.5 py-1 text-xs font-medium uppercase transition ${
-                    locale === l ? 'bg-zinc-700 text-zinc-50' : 'text-zinc-400 hover:text-zinc-200'
+                    locale === l ? 'bg-bg-elevated text-text-primary' : 'text-text-secondary hover:text-text-primary'
                   }`}
                 >
                   {l}
@@ -111,7 +111,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
             <button
               type="button"
               onClick={() => void onSignOut()}
-              className="rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary transition hover:bg-bg-elevated"
             >
               {t('auth.signOut')}
             </button>
@@ -127,8 +127,8 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
               role="tab"
               className={`border-b-2 px-4 py-2.5 text-sm font-medium transition ${
                 tab === id
-                  ? 'border-accent text-zinc-50'
-                  : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                  ? 'border-green text-text-primary'
+                  : 'border-transparent text-text-secondary hover:text-text-primary'
               }`}
             >
               {label}
@@ -149,7 +149,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
           />
         )}
         {loading ? (
-          <p className="p-10 text-center text-sm text-zinc-400">{t('app.loading')}</p>
+          <p className="p-10 text-center text-sm text-text-secondary">{t('app.loading')}</p>
         ) : tab === 'ingredients' ? (
           <IngredientsTab
             library={library}

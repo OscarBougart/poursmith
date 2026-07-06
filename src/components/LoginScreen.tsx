@@ -23,21 +23,21 @@ export default function LoginScreen({ onSignIn }: LoginScreenProps): ReactElemen
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+    <main className="flex min-h-screen items-center justify-center bg-bg-primary px-4">
       <form
         onSubmit={(e) => void handleSubmit(e)}
-        className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl"
+        className="w-full max-w-sm rounded-2xl border border-border bg-bg-card p-8 shadow-xl"
         aria-label={t('auth.signIn')}
       >
-        <h1 className="mb-6 text-2xl font-semibold tracking-tight text-zinc-50">
+        <h1 className="mb-6 text-2xl font-semibold tracking-tight text-text-primary">
           {t('app.title')}
         </h1>
         {failed && (
-          <p role="alert" className="mb-4 rounded-lg bg-red-950/60 px-3 py-2 text-sm text-red-300">
+          <p role="alert" className="mb-4 rounded-lg bg-margin-bad/10 px-3 py-2 text-sm text-margin-bad">
             {t('auth.error.invalid')}
           </p>
         )}
-        <label htmlFor="login-email" className="mb-1 block text-sm text-zinc-400">
+        <label htmlFor="login-email" className="mb-1 block text-sm text-text-secondary">
           {t('auth.email')}
         </label>
         <input
@@ -47,9 +47,9 @@ export default function LoginScreen({ onSignIn }: LoginScreenProps): ReactElemen
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-zinc-100 outline-none focus:border-accent"
+          className="mb-4 w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-text-primary outline-none focus:border-green"
         />
-        <label htmlFor="login-password" className="mb-1 block text-sm text-zinc-400">
+        <label htmlFor="login-password" className="mb-1 block text-sm text-text-secondary">
           {t('auth.password')}
         </label>
         <input
@@ -59,12 +59,12 @@ export default function LoginScreen({ onSignIn }: LoginScreenProps): ReactElemen
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-6 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-zinc-100 outline-none focus:border-accent"
+          className="mb-6 w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-text-primary outline-none focus:border-green"
         />
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-lg bg-accent px-4 py-2.5 font-medium text-white transition hover:bg-accent-hover disabled:opacity-60"
+          className="w-full rounded-lg bg-green px-4 py-2.5 font-medium text-bg-primary transition hover:bg-green-d1 disabled:opacity-60"
         >
           {pending ? t('auth.signingIn') : t('auth.signIn')}
         </button>

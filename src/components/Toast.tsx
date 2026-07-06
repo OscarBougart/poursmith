@@ -61,14 +61,14 @@ export function ToastProvider({ children }: { children: ReactNode }): ReactEleme
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="toast-enter flex items-start justify-between gap-3 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-100 shadow-xl"
+            className="toast-enter flex items-start justify-between gap-3 rounded-lg border border-border bg-bg-elevated px-4 py-3 text-sm text-text-primary shadow-xl"
           >
             <p>{toast.message}</p>
             <button
               type="button"
               onClick={() => dismiss(toast.id)}
               aria-label={t('common.close')}
-              className="shrink-0 rounded leading-none text-zinc-400 transition hover:text-zinc-100"
+              className="shrink-0 rounded leading-none text-text-secondary transition hover:text-text-primary"
             >
               ×
             </button>

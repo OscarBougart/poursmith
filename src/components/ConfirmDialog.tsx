@@ -44,22 +44,22 @@ export default function ConfirmDialog({
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="relative w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl outline-none"
+        className="relative w-full max-w-sm rounded-2xl border border-border bg-bg-card p-6 shadow-2xl outline-none"
       >
-        <h2 className="mb-2 text-lg font-semibold text-zinc-50">{title}</h2>
-        <p className="mb-6 text-sm text-zinc-300">{message}</p>
+        <h2 className="mb-2 text-lg font-semibold text-text-primary">{title}</h2>
+        <p className="mb-6 text-sm text-text-secondary">{message}</p>
         <div className="flex justify-end gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
+            className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary transition hover:bg-bg-elevated"
           >
             {t('common.cancel')}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-500"
+            className="rounded-lg bg-margin-bad px-4 py-2 text-sm font-medium text-bg-primary transition hover:bg-red-d1"
           >
             {confirmLabel}
           </button>

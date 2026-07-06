@@ -27,7 +27,7 @@ export default function FormActions({ pending, onCancel, onDelete }: FormActions
   return (
     <>
       {blockedByUse && onDelete && (
-        <p role="alert" className="mb-4 rounded-lg bg-amber-950/60 px-3 py-2 text-sm text-amber-300">
+        <p role="alert" className="mb-4 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
           {onDelete.inUseMessage}
         </p>
       )}
@@ -38,7 +38,7 @@ export default function FormActions({ pending, onCancel, onDelete }: FormActions
             type="button"
             disabled={pending}
             onClick={() => (onDelete.usedByNames.length > 0 ? setBlockedByUse(true) : setConfirming(true))}
-            className="rounded-lg border border-red-900 px-4 py-2 text-sm text-red-400 transition hover:bg-red-950/50"
+            className="rounded-lg border border-margin-bad/40 px-4 py-2 text-sm text-margin-bad transition hover:bg-margin-bad/10"
           >
             {t('common.delete')}
           </button>
@@ -49,14 +49,14 @@ export default function FormActions({ pending, onCancel, onDelete }: FormActions
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
+            className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary transition hover:bg-bg-elevated"
           >
             {t('common.cancel')}
           </button>
           <button
             type="submit"
             disabled={pending}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-hover disabled:opacity-60"
+            className="rounded-lg bg-green px-4 py-2 text-sm font-medium text-bg-primary transition hover:bg-green-d1 disabled:opacity-60"
           >
             {pending ? t('common.saving') : t('common.save')}
           </button>

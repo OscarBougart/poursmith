@@ -22,21 +22,21 @@ export default function CostPreview({ preview, flag }: CostPreviewProps): ReactE
   const t = useT();
   const { locale } = useLocale();
   return (
-    <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 text-sm">
-      <dt className="text-zinc-400">{t('recipe.pourCost')}</dt>
-      <dd className="text-right font-medium text-positive">
+    <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-border bg-bg-card/60 p-3 text-sm">
+      <dt className="text-text-secondary">{t('recipe.pourCost')}</dt>
+      <dd className="text-right font-medium text-margin-good">
         {preview !== null ? formatEur(preview.pourCost, locale) : '—'}
       </dd>
-      <dt className="text-zinc-400">{t('recipe.costPct')}</dt>
-      <dd className={`text-right font-medium ${flag ? FLAG_TEXT[flag] : 'text-zinc-200'}`}>
+      <dt className="text-text-secondary">{t('recipe.costPct')}</dt>
+      <dd className={`text-right font-medium ${flag ? FLAG_TEXT[flag] : 'text-text-secondary'}`}>
         {preview?.pct != null ? formatPercent(preview.pct, locale) : '—'}
       </dd>
-      <dt className="text-zinc-400">{t('recipe.margin')}</dt>
-      <dd className="text-right text-zinc-200">
+      <dt className="text-text-secondary">{t('recipe.margin')}</dt>
+      <dd className="text-right text-text-secondary">
         {preview?.margin != null ? formatEur(preview.margin, locale) : '—'}
       </dd>
-      <dt className="text-zinc-400">{t('recipe.suggestedPrice')}</dt>
-      <dd className="text-right font-medium text-zinc-100">
+      <dt className="text-text-secondary">{t('recipe.suggestedPrice')}</dt>
+      <dd className="text-right font-medium text-text-primary">
         {preview !== null ? formatEur(preview.suggested, locale) : '—'}
       </dd>
     </dl>

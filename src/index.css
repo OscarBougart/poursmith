@@ -1,50 +1,23 @@
 @import 'tailwindcss';
-
-/*
- * Semantic design tokens — one source of truth for the brand accent, surfaces,
- * ink ramp, and state colours. Values mirror the established zinc/emerald look,
- * so `bg-canvas`, `text-ink`, `border-line`, `bg-accent`, etc. read the same as
- * before but can be re-themed in one place.
- */
-@theme {
-  --color-canvas: #09090b; /* app shell */
-  --color-surface: #18181b; /* panels, table headers */
-  --color-line: #27272a; /* borders */
-  --color-line-strong: #3f3f46; /* input borders */
-
-  --color-ink: #fafafa; /* primary text */
-  --color-ink-soft: #e4e4e7; /* secondary text */
-  --color-ink-muted: #a1a1aa; /* muted text — ≥4.5:1 on canvas & surface */
-
-  /* Interactive brand accent. Violet, deliberately outside the green/amber/red
-     axis those are reserved for cost semantics below. Re-theme in one line. */
-  --color-accent: #7c3aed; /* primary actions, selection, focus */
-  --color-accent-hover: #8b5cf6;
-  --color-accent-soft: #a78bfa; /* accent as small text on dark — ≥4.5:1 */
-
-  /* Value & state colours — kept off the interactive accent. */
-  --color-positive: #34d399; /* money / healthy cost figures */
-  --color-success: #10b981; /* RAG: on target */
-  --color-warning: #f59e0b; /* RAG: approaching target */
-  --color-danger: #ef4444; /* RAG: over target */
-}
+@import './dram-tokens.css';
 
 body {
   margin: 0;
-  background-color: var(--color-canvas);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Placeholders need the same 4.5:1 as body text, not the faint UA default. */
+/* Placeholder / disabled ink per Dram's token. */
 ::placeholder {
-  color: var(--color-ink-muted);
+  color: var(--color-text-muted);
   opacity: 1;
 }
 
 /* Consistent, unmissable keyboard focus everywhere (buttons, links, tabs). */
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-green);
   outline-offset: 2px;
 }
 
@@ -54,7 +27,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-accent) 60%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-green) 60%, transparent);
 }
 
 /* Toast entrance — state feedback, quick ease-out. */

@@ -39,9 +39,9 @@ export default function RecipeLinesEditor({
 
   return (
     <fieldset className="mb-4">
-      <legend className="mb-2 block text-sm text-zinc-400">{t('prep.components')}</legend>
+      <legend className="mb-2 block text-sm text-text-secondary">{t('prep.components')}</legend>
       {linesError !== undefined && (
-        <p role="alert" className="mb-2 text-xs text-red-400">
+        <p role="alert" className="mb-2 text-xs text-margin-bad">
           {linesError}
         </p>
       )}
@@ -73,7 +73,7 @@ export default function RecipeLinesEditor({
                     ))}
                   </optgroup>
                 </select>
-                {errs?.component && <p role="alert" className="mt-1 text-xs text-red-400">{errs.component}</p>}
+                {errs?.component && <p role="alert" className="mt-1 text-xs text-margin-bad">{errs.component}</p>}
               </div>
               <div className="w-20">
                 <input
@@ -84,13 +84,13 @@ export default function RecipeLinesEditor({
                   aria-label={t('prep.amount')}
                   className={INPUT_CLASS}
                 />
-                {errs?.amount && <p role="alert" className="mt-1 text-xs text-red-400">{errs.amount}</p>}
+                {errs?.amount && <p role="alert" className="mt-1 text-xs text-margin-bad">{errs.amount}</p>}
               </div>
               <select
                 value={line.unit}
                 onChange={(e) => onUpdate(line.key, { unit: e.target.value as RecipeUnit })}
                 aria-label={t('ingredient.unit')}
-                className="w-24 rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-2 text-zinc-100 outline-none focus:border-accent"
+                className="w-24 rounded-lg border border-border bg-bg-primary px-2 py-2 text-text-primary outline-none focus:border-green"
               >
                 {RECIPE_UNITS.map((u) => (
                   <option key={u} value={u}>
@@ -98,12 +98,12 @@ export default function RecipeLinesEditor({
                   </option>
                 ))}
               </select>
-              <label className="mt-2.5 flex shrink-0 items-center gap-1 text-xs text-zinc-400">
+              <label className="mt-2.5 flex shrink-0 items-center gap-1 text-xs text-text-secondary">
                 <input
                   type="checkbox"
                   checked={line.is_garnish}
                   onChange={(e) => onUpdate(line.key, { is_garnish: e.target.checked })}
-                  className="accent-emerald-600"
+                  className="accent-green"
                 />
                 {t('recipe.garnish')}
               </label>
@@ -113,7 +113,7 @@ export default function RecipeLinesEditor({
                 aria-label={`${t('common.delete')}: ${
                   line.componentKey === '' ? t('prep.component') : componentName(line.componentKey, library)
                 }`}
-                className="mt-1 rounded p-1 text-lg leading-none text-zinc-400 transition hover:text-red-400"
+                className="mt-1 rounded p-1 text-lg leading-none text-text-secondary transition hover:text-margin-bad"
               >
                 ×
               </button>
@@ -124,7 +124,7 @@ export default function RecipeLinesEditor({
       <button
         type="button"
         onClick={onAdd}
-        className="mt-2 rounded-lg border border-dashed border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800"
+        className="mt-2 rounded-lg border border-dashed border-border px-3 py-1.5 text-sm text-text-secondary transition hover:bg-bg-elevated"
       >
         + {t('prep.addLine')}
       </button>

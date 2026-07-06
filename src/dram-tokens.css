@@ -1,0 +1,40 @@
+/*
+ * dram-tokens.css — the token bridge. Single source of truth for PourSmith's
+ * visual language, mirroring Dram's constants so the two apps read as one
+ * product. Never hardcode a colour in a component; reference a token.
+ *
+ * Values marked (Dram) are Dram's canonical constants. Values marked (derived)
+ * fill roles design.md references but Dram didn't hand over; adjust once the
+ * real Dram value is available.
+ */
+@theme {
+  /* Surfaces — page → card → elevated */
+  --color-bg-primary: #111111; /* base background (Dram) */
+  --color-bg-card: #1a1a1a; /* rows, panels, grouped inputs (Dram) */
+  --color-bg-elevated: #222222; /* modals, menus, toasts (Dram) */
+
+  /* Hairlines */
+  --color-border: #2a2a2a; /* base divider (Dram) */
+  --color-border-light: #3a3a3a; /* on elevated surfaces (derived) */
+
+  /* Ink — warm ivory, never pure white */
+  --color-text-primary: #f0ebe0; /* headings, key numbers (Dram) */
+  --color-text-secondary: #888888; /* labels, supporting copy (Dram) */
+  --color-text-muted: #444444; /* placeholder, disabled (Dram) */
+
+  /* Accent / positive — the through-line to Dram */
+  --color-green: #0ead69; /* primary actions, active states (Dram) */
+  --color-green-d1: #0c9c5c; /* hover / pressed emerald (derived) */
+
+  /* Danger — the only alarm colour */
+  --color-red: #e24b4a; /* errors, destructive, underwater (Dram) */
+  --color-red-d1: #cf3f3e; /* hover / pressed red (derived) */
+
+  /* Caution — thin margin, low-confidence estimates */
+  --color-warning: #f59e0b; /* (derived) */
+
+  /* Semantic aliases: use these in markup where colour expresses money state. */
+  --color-margin-good: #0ead69; /* healthy margin */
+  --color-margin-good-strong: #0c9c5c; /* pressed */
+  --color-margin-bad: #e24b4a; /* underwater */
+}

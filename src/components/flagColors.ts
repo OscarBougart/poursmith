@@ -5,18 +5,18 @@ import type { RagFlag } from '@/lib/menuAnalytics';
 
 /** Status dot fill. */
 export const FLAG_DOT: Record<RagFlag, string> = {
-  green: 'bg-success',
+  green: 'bg-margin-good',
   amber: 'bg-warning',
-  red: 'bg-danger',
-  unpriced: 'bg-zinc-600',
+  red: 'bg-margin-bad',
+  unpriced: 'bg-text-muted',
 };
 
 /** Cost-% text colour: the figure itself carries its health. */
 export const FLAG_TEXT: Record<RagFlag, string> = {
-  green: 'text-success',
+  green: 'text-margin-good',
   amber: 'text-warning',
-  red: 'text-danger',
-  unpriced: 'text-zinc-400',
+  red: 'text-margin-bad',
+  unpriced: 'text-text-secondary',
 };
 
 /** Row wash — only the drinks that need attention are tinted; healthy and
@@ -24,6 +24,6 @@ export const FLAG_TEXT: Record<RagFlag, string> = {
 export const FLAG_ROW_TINT: Record<RagFlag, string> = {
   green: '',
   amber: 'bg-warning/10',
-  red: 'bg-danger/10',
+  red: 'bg-margin-bad/10',
   unpriced: '',
 };

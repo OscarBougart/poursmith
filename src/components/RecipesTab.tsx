@@ -125,25 +125,25 @@ export default function RecipesTab({
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('common.search')}
           aria-label={t('common.search')}
-          className="w-56 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
+          className="w-56 rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
         />
         <button
           type="button"
           onClick={() => setEditing({ mode: 'new' })}
-          className="ml-auto rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-hover"
+          className="ml-auto rounded-lg bg-green px-4 py-2 text-sm font-medium text-bg-primary transition hover:bg-green-d1"
         >
           {t('recipe.add')}
         </button>
       </div>
 
       {rows.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-400">
+        <p className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-text-secondary">
           {t('recipe.empty')}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-zinc-800">
+        <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-400">
+            <thead className="bg-bg-card text-xs uppercase tracking-wide text-text-secondary">
               <tr>
                 <SortHeader columnKey="name" sort={sort} onToggle={toggle} label={t('common.name')} />
                 <SortHeader columnKey="glass" sort={sort} onToggle={toggle} label={t('recipe.glass')} />
@@ -155,32 +155,32 @@ export default function RecipesTab({
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800/70">
+            <tbody className="divide-y divide-border/70">
               {rows.map(({ recipe, pourCost, pct, margin, suggested, flag }) => (
-                <tr key={recipe.id} className="bg-zinc-950/40 transition hover:bg-zinc-900">
+                <tr key={recipe.id} className="bg-bg-card/40 transition hover:bg-bg-elevated">
                   <td className="px-4 py-3">
                     <button
                       type="button"
                       onClick={() => setEditing({ mode: 'edit', recipe })}
-                      className="font-medium text-zinc-100 hover:underline"
+                      className="font-medium text-text-primary hover:underline"
                     >
                       {recipe.name}
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-zinc-400">{recipe.glass ?? '—'}</td>
-                  <td className="px-4 py-3 text-zinc-300">
+                  <td className="px-4 py-3 text-text-secondary">{recipe.glass ?? '—'}</td>
+                  <td className="px-4 py-3 text-text-secondary">
                     {recipe.price_gross != null ? formatEur(recipe.price_gross, locale) : '—'}
                   </td>
-                  <td className="px-4 py-3 font-medium text-positive">
+                  <td className="px-4 py-3 font-medium text-margin-good">
                     {pourCost !== null ? formatEur(pourCost, locale) : '—'}
                   </td>
                   <td className={`px-4 py-3 font-medium ${FLAG_TEXT[flag]}`}>
                     {pct !== null ? formatPercent(pct, locale) : '—'}
                   </td>
-                  <td className="px-4 py-3 text-zinc-300">
+                  <td className="px-4 py-3 text-text-secondary">
                     {margin !== null ? formatEur(margin, locale) : '—'}
                   </td>
-                  <td className="px-4 py-3 text-zinc-100">
+                  <td className="px-4 py-3 text-text-primary">
                     {suggested !== null ? formatEur(suggested, locale) : '—'}
                   </td>
                   <td className="px-4 py-3">
@@ -188,14 +188,14 @@ export default function RecipesTab({
                       <button
                         type="button"
                         onClick={() => void duplicate(recipe)}
-                        className="rounded-lg border border-zinc-700 px-2.5 py-1 text-xs text-zinc-300 transition hover:bg-zinc-800"
+                        className="rounded-lg border border-border px-2.5 py-1 text-xs text-text-secondary transition hover:bg-bg-elevated"
                       >
                         {t('recipe.duplicate')}
                       </button>
                       <button
                         type="button"
                         onClick={() => onOpenBatch(recipe)}
-                        className="rounded-lg border border-zinc-700 px-2.5 py-1 text-xs text-zinc-300 transition hover:bg-zinc-800"
+                        className="rounded-lg border border-border px-2.5 py-1 text-xs text-text-secondary transition hover:bg-bg-elevated"
                       >
                         {t('recipe.batchSheet')}
                       </button>

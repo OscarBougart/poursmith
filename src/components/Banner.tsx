@@ -11,8 +11,8 @@ export default function Banner({ kind, message, onDismiss }: BannerProps): React
   const t = useT();
   const tone =
     kind === 'error'
-      ? 'border-red-900 bg-red-950/60 text-red-200'
-      : 'border-emerald-900 bg-emerald-950/60 text-emerald-200';
+      ? 'border-margin-bad/40 bg-margin-bad/10 text-red-200'
+      : 'border-margin-good/40 bg-margin-good/10 text-margin-good';
   return (
     <div
       role={kind === 'error' ? 'alert' : 'status'}

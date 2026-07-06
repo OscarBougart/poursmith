@@ -42,9 +42,9 @@ export default function PrepLinesEditor({
 
   return (
     <fieldset className="mb-4">
-      <legend className="mb-2 block text-sm text-zinc-400">{t('prep.components')}</legend>
+      <legend className="mb-2 block text-sm text-text-secondary">{t('prep.components')}</legend>
       {linesError !== undefined && (
-        <p role="alert" className="mb-2 text-xs text-red-400">
+        <p role="alert" className="mb-2 text-xs text-margin-bad">
           {linesError}
         </p>
       )}
@@ -83,7 +83,7 @@ export default function PrepLinesEditor({
                     ))}
                   </optgroup>
                 </select>
-                {errs?.component && <p role="alert" className="mt-1 text-xs text-red-400">{errs.component}</p>}
+                {errs?.component && <p role="alert" className="mt-1 text-xs text-margin-bad">{errs.component}</p>}
               </div>
               <div className="w-28">
                 <input
@@ -94,9 +94,9 @@ export default function PrepLinesEditor({
                   aria-label={t('prep.amount')}
                   className={INPUT_CLASS}
                 />
-                {errs?.amount && <p role="alert" className="mt-1 text-xs text-red-400">{errs.amount}</p>}
+                {errs?.amount && <p role="alert" className="mt-1 text-xs text-margin-bad">{errs.amount}</p>}
               </div>
-              <span className="mt-2.5 w-10 shrink-0 text-sm text-zinc-400">
+              <span className="mt-2.5 w-10 shrink-0 text-sm text-text-secondary">
                 {nativeUnit !== null ? t(`unit.${nativeUnit}`) : ''}
               </span>
               <button
@@ -105,7 +105,7 @@ export default function PrepLinesEditor({
                 aria-label={`${t('common.delete')}: ${
                   line.componentKey === '' ? t('prep.component') : componentName(line.componentKey, library)
                 }`}
-                className="mt-1 rounded p-1 text-lg leading-none text-zinc-400 transition hover:text-red-400"
+                className="mt-1 rounded p-1 text-lg leading-none text-text-secondary transition hover:text-margin-bad"
               >
                 ×
               </button>
@@ -116,7 +116,7 @@ export default function PrepLinesEditor({
       <button
         type="button"
         onClick={onAdd}
-        className="mt-2 rounded-lg border border-dashed border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800"
+        className="mt-2 rounded-lg border border-dashed border-border px-3 py-1.5 text-sm text-text-secondary transition hover:bg-bg-elevated"
       >
         + {t('prep.addLine')}
       </button>

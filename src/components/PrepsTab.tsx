@@ -121,25 +121,25 @@ export default function PrepsTab({
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('common.search')}
           aria-label={t('common.search')}
-          className="w-56 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
+          className="w-56 rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
         />
         <button
           type="button"
           onClick={() => setEditing({ mode: 'new' })}
-          className="ml-auto rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-hover"
+          className="ml-auto rounded-lg bg-green px-4 py-2 text-sm font-medium text-bg-primary transition hover:bg-green-d1"
         >
           {t('prep.add')}
         </button>
       </div>
 
       {rows.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-400">
+        <p className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-text-secondary">
           {t('prep.empty')}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-zinc-800">
+        <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-400">
+            <thead className="bg-bg-card text-xs uppercase tracking-wide text-text-secondary">
               <tr>
                 <th className="w-10 px-2 py-3" />
                 <SortHeader columnKey="name" sort={sort} onToggle={toggleSort} label={t('common.name')} />
@@ -149,12 +149,12 @@ export default function PrepsTab({
                 <SortHeader columnKey="components" sort={sort} onToggle={toggleSort} label={t('prep.components')} />
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800/70">
+            <tbody className="divide-y divide-border/70">
               {rows.map(({ prep, lines, unitCost }) => {
                 const isOpen = expanded.has(prep.id);
                 return (
                   <Fragment key={prep.id}>
-                    <tr className="bg-zinc-950/40 transition hover:bg-zinc-900">
+                    <tr className="bg-bg-card/40 transition hover:bg-bg-elevated">
                       <td className="px-2 py-3">
                         <button
                           type="button"
@@ -170,28 +170,28 @@ export default function PrepsTab({
                         <button
                           type="button"
                           onClick={() => setEditing({ mode: 'edit', prep })}
-                          className="font-medium text-zinc-100 hover:underline"
+                          className="font-medium text-text-primary hover:underline"
                         >
                           {prep.name}
                         </button>
                       </td>
-                      <td className="px-4 py-3 text-zinc-300">
+                      <td className="px-4 py-3 text-text-secondary">
                         {formatNumber(prep.yield_amount, locale)} {t(`unit.${prep.yield_unit}`)}
                       </td>
-                      <td className="px-4 py-3 font-medium text-positive">
+                      <td className="px-4 py-3 font-medium text-margin-good">
                         {unitCost !== null
                           ? formatPerUnit(unitCost, t(`unit.${prep.yield_unit}`), locale)
                           : '—'}
                       </td>
-                      <td className="px-4 py-3 text-zinc-300">
+                      <td className="px-4 py-3 text-text-secondary">
                         {unitCost !== null
                           ? formatEur(unitCost * prep.yield_amount, locale)
                           : '—'}
                       </td>
-                      <td className="px-4 py-3 text-zinc-400">{lines.length}</td>
+                      <td className="px-4 py-3 text-text-secondary">{lines.length}</td>
                     </tr>
                     {isOpen && (
-                      <tr className="bg-zinc-900/60">
+                      <tr className="bg-bg-card/60">
                         <td />
                         <td colSpan={5} className="px-4 py-3">
                           <ul className="flex flex-col gap-1 text-sm">
@@ -199,10 +199,10 @@ export default function PrepsTab({
                               const info = lineInfo(line);
                               return (
                                 <li key={line.id} className="flex justify-between gap-4">
-                                  <span className="text-zinc-300">
+                                  <span className="text-text-secondary">
                                     {info.name} — {formatNumber(line.amount, locale)} {info.unitLabel}
                                   </span>
-                                  <span className="text-zinc-400">
+                                  <span className="text-text-secondary">
                                     {info.cost !== null ? formatEur(info.cost, locale) : '—'}
                                   </span>
                                 </li>

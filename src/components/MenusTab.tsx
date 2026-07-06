@@ -86,15 +86,15 @@ export default function MenusTab({
             onChange={(e) => setNewName(e.target.value)}
             placeholder={t('menu.name')}
             aria-label={t('menu.name')}
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
+            className="w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
           />
-          <button type="submit" className="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white transition hover:bg-accent-hover">
+          <button type="submit" className="rounded-lg bg-green px-3 py-2 text-sm font-medium text-bg-primary transition hover:bg-green-d1">
             +
           </button>
         </form>
 
         {library.menus.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-zinc-800 p-4 text-center text-xs text-zinc-400">
+          <p className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-text-secondary">
             {t('menu.empty')}
           </p>
         ) : (
@@ -113,14 +113,14 @@ export default function MenusTab({
                       if (e.key === 'Escape') setRenamingId(null);
                     }}
                     aria-label={t('menu.rename')}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
+                    className="w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
                   />
                 ) : (
                   <div
                     className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm transition ${
                       selectedId === menu.id
-                        ? 'border-accent bg-accent/10 text-zinc-50'
-                        : 'border-zinc-800 text-zinc-300 hover:bg-zinc-900'
+                        ? 'border-green bg-green/10 text-text-primary'
+                        : 'border-border text-text-secondary hover:bg-bg-elevated'
                     }`}
                   >
                     <button type="button" onClick={() => setSelectedId(menu.id)} className="flex-1 text-left">
@@ -170,7 +170,7 @@ export default function MenusTab({
             onExportCsv={() => onExportCsv(selected)}
           />
         ) : (
-          <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-400">
+          <p className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-text-secondary">
             {t('menu.empty')}
           </p>
         )}

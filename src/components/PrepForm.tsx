@@ -237,9 +237,9 @@ export default function PrepForm({
         onAdd={drafts.add}
       />
 
-      <p className="mb-4 text-sm text-zinc-400">
+      <p className="mb-4 text-sm text-text-secondary">
         {t('prep.unitCost')}:{' '}
-        <span className="font-medium text-positive">
+        <span className="font-medium text-margin-good">
           {preview !== null ? formatPerUnit(preview, t(`unit.${yieldUnit}`), locale) : '—'}
         </span>
       </p>

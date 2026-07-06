@@ -87,10 +87,10 @@ export default function SlideOver({
           aria-modal="true"
           aria-label={title}
           tabIndex={-1}
-          className="absolute top-0 right-0 h-full w-full max-w-md overflow-y-auto border-l border-zinc-800 bg-zinc-900 p-6 shadow-2xl outline-none"
+          className="absolute top-0 right-0 h-full w-full max-w-md overflow-y-auto border-l border-border bg-bg-card p-6 shadow-2xl outline-none"
         >
           <header className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-zinc-50">{title}</h2>
+            <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
             <button type="button" onClick={requestClose} aria-label={t('common.close')} className={ICON_BUTTON}>
               ×
             </button>

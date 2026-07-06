@@ -17,7 +17,7 @@ export interface BatchSheetDialogProps {
 type Mode = 'serves' | 'volume';
 
 const INPUT_CLASS =
-  'w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-zinc-100 outline-none focus:border-accent';
+  'w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-text-primary outline-none focus:border-green';
 
 export default function BatchSheetDialog({
   recipe,
@@ -64,8 +64,8 @@ export default function BatchSheetDialog({
             aria-pressed={mode === m}
             className={`rounded-lg border px-3 py-2 text-sm transition ${
               mode === m
-                ? 'border-accent bg-accent/15 text-zinc-100'
-                : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                ? 'border-green bg-green/15 text-text-primary'
+                : 'border-border text-text-secondary hover:bg-bg-elevated'
             }`}
           >
             {t(`batch.mode.${m}`)}
@@ -76,21 +76,21 @@ export default function BatchSheetDialog({
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 print:hidden">
         {mode === 'serves' ? (
           <div>
-            <label htmlFor="batch-serves" className="mb-1 block text-sm text-zinc-400">
+            <label htmlFor="batch-serves" className="mb-1 block text-sm text-text-secondary">
               {t('batch.serves')}
             </label>
             <input id="batch-serves" type="text" inputMode="decimal" value={serves} onChange={(e) => setServes(e.target.value)} className={INPUT_CLASS} />
           </div>
         ) : (
           <div>
-            <label htmlFor="batch-volume" className="mb-1 block text-sm text-zinc-400">
+            <label htmlFor="batch-volume" className="mb-1 block text-sm text-text-secondary">
               {t('batch.mode.volume')}
             </label>
             <input id="batch-volume" type="text" inputMode="decimal" value={targetVolume} onChange={(e) => setTargetVolume(e.target.value)} className={INPUT_CLASS} />
           </div>
         )}
         <div>
-          <label htmlFor="batch-dilution" className="mb-1 block text-sm text-zinc-400">
+          <label htmlFor="batch-dilution" className="mb-1 block text-sm text-text-secondary">
             {t('batch.dilution')}
           </label>
           <input id="batch-dilution" type="text" inputMode="decimal" value={dilutionValue} onChange={(e) => setDilution(e.target.value)} className={INPUT_CLASS} />
@@ -104,24 +104,24 @@ export default function BatchSheetDialog({
             {t('batch.serves')}
           </h3>
           <table className="mb-4 w-full text-left text-sm">
-            <tbody className="divide-y divide-zinc-800/70 print:divide-gray-300">
+            <tbody className="divide-y divide-border/70 print:divide-gray-300">
               {sheet.lines.map((line) => (
                 <tr key={line.name}>
-                  <td className="py-2 text-zinc-200 print:text-black">{line.name}</td>
-                  <td className="py-2 text-right text-zinc-300 print:text-black">
+                  <td className="py-2 text-text-secondary print:text-black">{line.name}</td>
+                  <td className="py-2 text-right text-text-secondary print:text-black">
                     {formatNumber(line.amount, locale)} {t(`unit.${line.unit}`)}
                     {line.amountMl !== null && line.unit !== 'ml' && (
-                      <span className="text-zinc-400"> ({formatNumber(line.amountMl, locale)} ml)</span>
+                      <span className="text-text-secondary"> ({formatNumber(line.amountMl, locale)} ml)</span>
                     )}
                   </td>
-                  <td className="py-2 text-right text-zinc-400 print:text-black">
+                  <td className="py-2 text-right text-text-secondary print:text-black">
                     {formatEur(line.cost, locale)}
                   </td>
                 </tr>
               ))}
               <tr>
-                <td className="py-2 text-zinc-200 print:text-black">{t('batch.water')}</td>
-                <td className="py-2 text-right text-zinc-300 print:text-black">
+                <td className="py-2 text-text-secondary print:text-black">{t('batch.water')}</td>
+                <td className="py-2 text-right text-text-secondary print:text-black">
                   {formatNumber(sheet.waterMl, locale)} ml
                 </td>
                 <td />
@@ -129,15 +129,15 @@ export default function BatchSheetDialog({
             </tbody>
           </table>
 
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 text-sm print:border-gray-300 print:bg-white print:text-black">
-            <dt className="text-zinc-400 print:text-black">{t('batch.serves')}</dt>
-            <dd className="text-right text-zinc-200 print:text-black">{formatNumber(sheet.serves, locale)}</dd>
-            <dt className="text-zinc-400 print:text-black">{t('batch.totalVolume')}</dt>
-            <dd className="text-right text-zinc-200 print:text-black">{formatNumber(sheet.totalVolumeMl, locale)} ml</dd>
-            <dt className="text-zinc-400 print:text-black">{t('batch.totalCost')}</dt>
-            <dd className="text-right text-zinc-200 print:text-black">{formatEur(sheet.totalCost, locale)}</dd>
-            <dt className="text-zinc-400 print:text-black">{t('batch.costPerServe')}</dt>
-            <dd className="text-right font-medium text-positive print:text-black">
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-border bg-bg-card/60 p-3 text-sm print:border-gray-300 print:bg-white print:text-black">
+            <dt className="text-text-secondary print:text-black">{t('batch.serves')}</dt>
+            <dd className="text-right text-text-secondary print:text-black">{formatNumber(sheet.serves, locale)}</dd>
+            <dt className="text-text-secondary print:text-black">{t('batch.totalVolume')}</dt>
+            <dd className="text-right text-text-secondary print:text-black">{formatNumber(sheet.totalVolumeMl, locale)} ml</dd>
+            <dt className="text-text-secondary print:text-black">{t('batch.totalCost')}</dt>
+            <dd className="text-right text-text-secondary print:text-black">{formatEur(sheet.totalCost, locale)}</dd>
+            <dt className="text-text-secondary print:text-black">{t('batch.costPerServe')}</dt>
+            <dd className="text-right font-medium text-margin-good print:text-black">
               {formatEur(sheet.costPerServe, locale)}
             </dd>
           </dl>
@@ -145,7 +145,7 @@ export default function BatchSheetDialog({
           <button
             type="button"
             onClick={() => window.print()}
-            className="mt-4 w-full rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800 print:hidden"
+            className="mt-4 w-full rounded-lg border border-border px-4 py-2 text-sm text-text-secondary transition hover:bg-bg-elevated print:hidden"
           >
             {t('batch.print')}
           </button>

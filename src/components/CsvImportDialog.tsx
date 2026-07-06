@@ -66,7 +66,7 @@ export default function CsvImportDialog({
   return (
     <SlideOver title={t('csv.title')} open={open} onClose={handleClose}>
       {serverError !== null && (
-        <p role="alert" className="mb-4 rounded-lg bg-red-950/60 px-3 py-2 text-sm text-red-300">
+        <p role="alert" className="mb-4 rounded-lg bg-margin-bad/10 px-3 py-2 text-sm text-margin-bad">
           {t('common.error.generic', { message: serverError })}
         </p>
       )}
@@ -75,13 +75,13 @@ export default function CsvImportDialog({
         <button
           type="button"
           onClick={downloadTemplate}
-          className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
+          className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary transition hover:bg-bg-elevated"
         >
           {t('csv.downloadTemplate')}
         </button>
         <label
           htmlFor="csv-file"
-          className="cursor-pointer rounded-lg border border-dashed border-zinc-600 px-4 py-6 text-center text-sm text-zinc-300 transition hover:bg-zinc-800"
+          className="cursor-pointer rounded-lg border border-dashed border-border-light px-4 py-6 text-center text-sm text-text-secondary transition hover:bg-bg-elevated"
         >
           {t('csv.chooseFile')}
           <input
@@ -97,17 +97,17 @@ export default function CsvImportDialog({
 
       {result !== null && (
         <div>
-          <p className="mb-2 text-sm text-zinc-300">
+          <p className="mb-2 text-sm text-text-secondary">
             {t('csv.rowsFound', { n: result.totalRows })}
             {result.errors.length > 0 && (
-              <span className="ml-2 text-red-400">
+              <span className="ml-2 text-margin-bad">
                 {t('csv.errorsFound', { n: result.errors.length })}
               </span>
             )}
           </p>
 
           {result.errors.length > 0 && (
-            <ul className="mb-4 flex flex-col gap-1 rounded-lg bg-red-950/40 p-3 text-xs text-red-300">
+            <ul className="mb-4 flex flex-col gap-1 rounded-lg bg-margin-bad/10 p-3 text-xs text-margin-bad">
               {result.errors.map((error) => (
                 <li key={`${error.row}-${error.field}`}>
                   {t('csv.row', { row: error.row })}: {error.field} — {t(error.key)}
@@ -117,9 +117,9 @@ export default function CsvImportDialog({
           )}
 
           {result.valid.length > 0 && (
-            <div className="mb-4 max-h-64 overflow-y-auto rounded-lg border border-zinc-800">
+            <div className="mb-4 max-h-64 overflow-y-auto rounded-lg border border-border">
               <table className="w-full text-left text-xs">
-                <thead className="bg-zinc-900 text-zinc-400">
+                <thead className="bg-bg-card text-text-secondary">
                   <tr>
                     <th className="px-3 py-2">{t('common.name')}</th>
                     <th className="px-3 py-2">{t('ingredient.category')}</th>
@@ -127,15 +127,15 @@ export default function CsvImportDialog({
                     <th className="px-3 py-2">{t('ingredient.priceGross')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800/70">
+                <tbody className="divide-y divide-border/70">
                   {result.valid.map((row) => (
                     <tr key={row.name}>
-                      <td className="px-3 py-2 text-zinc-200">{row.name}</td>
-                      <td className="px-3 py-2 text-zinc-400">{t(`category.${row.category}`)}</td>
-                      <td className="px-3 py-2 text-zinc-400">
+                      <td className="px-3 py-2 text-text-secondary">{row.name}</td>
+                      <td className="px-3 py-2 text-text-secondary">{t(`category.${row.category}`)}</td>
+                      <td className="px-3 py-2 text-text-secondary">
                         {formatNumber(row.pack_size, locale)} {t(`unit.${row.unit}`)}
                       </td>
-                      <td className="px-3 py-2 text-zinc-400">
+                      <td className="px-3 py-2 text-text-secondary">
                         {formatNumber(row.price_gross, locale)} €
                       </td>
                     </tr>
@@ -149,7 +149,7 @@ export default function CsvImportDialog({
             type="button"
             disabled={pending || result.valid.length === 0}
             onClick={() => void handleImport()}
-            className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition hover:bg-accent-hover disabled:opacity-50"
+            className="w-full rounded-lg bg-green px-4 py-2.5 text-sm font-medium text-bg-primary transition hover:bg-green-d1 disabled:opacity-50"
           >
             {pending ? t('common.saving') : t('csv.importValid', { n: result.valid.length })}
           </button>

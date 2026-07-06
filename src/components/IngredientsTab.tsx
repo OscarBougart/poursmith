@@ -85,13 +85,13 @@ export default function IngredientsTab({
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('common.search')}
           aria-label={t('common.search')}
-          className="w-56 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
+          className="w-56 rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
         />
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as Category | 'all')}
           aria-label={t('ingredient.category')}
-          className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-accent"
+          className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
         >
           <option value="all">{t('common.all')}</option>
           {CATEGORIES.map((c) => (
@@ -104,14 +104,14 @@ export default function IngredientsTab({
           <button
             type="button"
             onClick={onOpenImport}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 transition hover:bg-zinc-800"
+            className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary transition hover:bg-bg-elevated"
           >
             {t('ingredient.import')}
           </button>
           <button
             type="button"
             onClick={() => setEditing({ mode: 'new' })}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-hover"
+            className="rounded-lg bg-green px-4 py-2 text-sm font-medium text-bg-primary transition hover:bg-green-d1"
           >
             {t('ingredient.add')}
           </button>
@@ -119,13 +119,13 @@ export default function IngredientsTab({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-zinc-800 p-10 text-center text-sm text-zinc-400">
+        <p className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-text-secondary">
           {t('ingredient.empty')}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-zinc-800">
+        <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-400">
+            <thead className="bg-bg-card text-xs uppercase tracking-wide text-text-secondary">
               <tr>
                 <SortHeader columnKey="name" sort={sort} onToggle={toggle} label={t('common.name')} />
                 <SortHeader columnKey="category" sort={sort} onToggle={toggle} label={t('ingredient.category')} />
@@ -135,12 +135,12 @@ export default function IngredientsTab({
                 <SortHeader columnKey="unitCost" sort={sort} onToggle={toggle} label={t('ingredient.unitCost')} />
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800/70">
+            <tbody className="divide-y divide-border/70">
               {filtered.map((ingredient) => (
                 <tr
                   key={ingredient.id}
                   onClick={() => setEditing({ mode: 'edit', ingredient })}
-                  className="cursor-pointer bg-zinc-950/40 transition hover:bg-zinc-900"
+                  className="cursor-pointer bg-bg-card/40 transition hover:bg-bg-elevated"
                 >
                   <td className="px-4 py-3">
                     <button
@@ -149,20 +149,20 @@ export default function IngredientsTab({
                         e.stopPropagation();
                         setEditing({ mode: 'edit', ingredient });
                       }}
-                      className="font-medium text-zinc-100 hover:underline"
+                      className="font-medium text-text-primary hover:underline"
                     >
                       {ingredient.name}
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-zinc-400">{t(`category.${ingredient.category}`)}</td>
-                  <td className="px-4 py-3 text-zinc-300">
+                  <td className="px-4 py-3 text-text-secondary">{t(`category.${ingredient.category}`)}</td>
+                  <td className="px-4 py-3 text-text-secondary">
                     {formatNumber(ingredient.pack_size, locale)} {t(`unit.${ingredient.unit}`)}
                   </td>
-                  <td className="px-4 py-3 text-zinc-300">{formatEur(ingredient.price_net, locale)}</td>
-                  <td className="px-4 py-3 text-zinc-400">
+                  <td className="px-4 py-3 text-text-secondary">{formatEur(ingredient.price_net, locale)}</td>
+                  <td className="px-4 py-3 text-text-secondary">
                     {formatNumber(ingredient.waste_pct, locale)} %
                   </td>
-                  <td className="px-4 py-3 font-medium text-positive">
+                  <td className="px-4 py-3 font-medium text-margin-good">
                     {formatPerUnit(ingredientUnitCost(ingredient), t(`unit.${ingredient.unit}`), locale)}
                   </td>
                 </tr>

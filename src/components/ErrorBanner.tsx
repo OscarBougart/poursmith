@@ -5,7 +5,7 @@ import { useT } from '@/i18n';
 export default function ErrorBanner({ message }: { message: string }): ReactElement {
   const t = useT();
   return (
-    <p role="alert" className="mb-4 rounded-lg bg-red-950/60 px-3 py-2 text-sm text-red-300">
+    <p role="alert" className="mb-4 rounded-lg bg-margin-bad/10 px-3 py-2 text-sm text-margin-bad">
       {t('common.error.generic', { message })}
     </p>
   );

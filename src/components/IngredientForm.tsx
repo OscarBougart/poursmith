@@ -193,8 +193,8 @@ export default function IngredientForm({
         </Field>
       </div>
 
-      <p className="mb-4 text-sm text-zinc-400">
-        {t('ingredient.priceNet')}: <span className="font-medium text-zinc-100">{netPreview}</span>
+      <p className="mb-4 text-sm text-text-secondary">
+        {t('ingredient.priceNet')}: <span className="font-medium text-text-primary">{netPreview}</span>
       </p>
 
       <Field
