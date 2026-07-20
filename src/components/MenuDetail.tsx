@@ -88,7 +88,7 @@ export default function MenuDetail({
             value={guestLang}
             onChange={(e) => setGuestLang(e.target.value as Locale)}
             aria-label={t('menu.language')}
-            className="rounded-lg border border-border bg-bg-primary px-2 py-1.5 text-sm text-text-primary outline-none focus:border-green"
+            className="rounded-lg border border-border bg-bg-primary px-2 py-1.5 text-sm text-text-primary outline-none focus:border-accent"
           >
             <option value="de">DE</option>
             <option value="en">EN</option>
@@ -133,7 +133,7 @@ export default function MenuDetail({
           onChange={(e) => {
             if (e.target.value !== '') void onAddItem(e.target.value);
           }}
-          className="w-64 rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
+          className="w-64 rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
         >
           <option value="">{t('menu.pick')}</option>
           {availableRecipes.map((r) => (

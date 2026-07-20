@@ -22,8 +22,15 @@
   --color-text-secondary: #888888; /* labels, supporting copy (Dram) */
   --color-text-muted: #444444; /* placeholder, disabled (Dram) */
 
-  /* Accent / positive — the through-line to Dram */
-  --color-green: #0ead69; /* primary actions, active states (Dram) */
+  /* Brand accent — the interactive violet, carried over from the Dram mark.
+     Deliberately OFF the green/amber/red axis so brand never reads as a money
+     signal: green/amber/red mean profitability, violet means "interact". */
+  --color-accent: #7431e8; /* buttons, active tab, focus, links (white text ~6:1) */
+  --color-accent-d1: #5f21cc; /* hover / pressed */
+  --color-accent-bright: #8b47ff; /* the logo mark, matched to favicon.svg */
+
+  /* Positive — retained for money semantics only (see aliases below) */
+  --color-green: #0ead69; /* healthy margin (Dram) */
   --color-green-d1: #0c9c5c; /* hover / pressed emerald (derived) */
 
   /* Danger — the only alarm colour */
@@ -37,4 +44,8 @@
   --color-margin-good: #0ead69; /* healthy margin */
   --color-margin-good-strong: #0c9c5c; /* pressed */
   --color-margin-bad: #e24b4a; /* underwater */
+
+  /* Type — a warm display serif for the wordmark and headings, against the
+     system sans that carries the dense tool UI. Contrast on the display axis. */
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
 }

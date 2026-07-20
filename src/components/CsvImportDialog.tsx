@@ -149,7 +149,7 @@ export default function CsvImportDialog({
             type="button"
             disabled={pending || result.valid.length === 0}
             onClick={() => void handleImport()}
-            className="w-full rounded-lg bg-green px-4 py-2.5 text-sm font-medium text-bg-primary transition hover:bg-green-d1 disabled:opacity-50"
+            className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition hover:bg-accent-d1 disabled:opacity-50"
           >
             {pending ? t('common.saving') : t('csv.importValid', { n: result.valid.length })}
           </button>

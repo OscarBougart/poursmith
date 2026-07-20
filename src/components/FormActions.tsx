@@ -56,7 +56,7 @@ export default function FormActions({ pending, onCancel, onDelete }: FormActions
           <button
             type="submit"
             disabled={pending}
-            className="rounded-lg bg-green px-4 py-2 text-sm font-medium text-bg-primary transition hover:bg-green-d1 disabled:opacity-60"
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-d1 disabled:opacity-60"
           >
             {pending ? t('common.saving') : t('common.save')}
           </button>

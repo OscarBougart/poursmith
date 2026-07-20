@@ -85,13 +85,13 @@ export default function IngredientsTab({
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('common.search')}
           aria-label={t('common.search')}
-          className="w-56 rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
+          className="w-56 rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
         />
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as Category | 'all')}
           aria-label={t('ingredient.category')}
-          className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
+          className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
         >
           <option value="all">{t('common.all')}</option>
           {CATEGORIES.map((c) => (
@@ -111,7 +111,7 @@ export default function IngredientsTab({
           <button
             type="button"
             onClick={() => setEditing({ mode: 'new' })}
-            className="rounded-lg bg-green px-4 py-2 text-sm font-medium text-bg-primary transition hover:bg-green-d1"
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-d1"
           >
             {t('ingredient.add')}
           </button>

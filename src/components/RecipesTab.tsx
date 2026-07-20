@@ -125,12 +125,12 @@ export default function RecipesTab({
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('common.search')}
           aria-label={t('common.search')}
-          className="w-56 rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
+          className="w-56 rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
         />
         <button
           type="button"
           onClick={() => setEditing({ mode: 'new' })}
-          className="ml-auto rounded-lg bg-green px-4 py-2 text-sm font-medium text-bg-primary transition hover:bg-green-d1"
+          className="ml-auto rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-d1"
         >
           {t('recipe.add')}
         </button>

@@ -86,9 +86,9 @@ export default function MenusTab({
             onChange={(e) => setNewName(e.target.value)}
             placeholder={t('menu.name')}
             aria-label={t('menu.name')}
-            className="w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
+            className="w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
           />
-          <button type="submit" className="rounded-lg bg-green px-3 py-2 text-sm font-medium text-bg-primary transition hover:bg-green-d1">
+          <button type="submit" className="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white transition hover:bg-accent-d1">
             +
           </button>
         </form>
@@ -113,13 +113,13 @@ export default function MenusTab({
                       if (e.key === 'Escape') setRenamingId(null);
                     }}
                     aria-label={t('menu.rename')}
-                    className="w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-green"
+                    className="w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-text-primary outline-none focus:border-accent"
                   />
                 ) : (
                   <div
                     className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm transition ${
                       selectedId === menu.id
-                        ? 'border-green bg-green/10 text-text-primary'
+                        ? 'border-accent bg-accent/10 text-text-primary'
                         : 'border-border text-text-secondary hover:bg-bg-elevated'
                     }`}
                   >

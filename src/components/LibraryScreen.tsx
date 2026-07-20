@@ -103,7 +103,12 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
       <DemoBanner />
       <header className="border-b border-border print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-          <h1 className="text-xl font-semibold tracking-tight">{t('app.title')}</h1>
+          <h1 className="flex items-center gap-2.5">
+            <img src="/favicon.svg" alt="" aria-hidden="true" className="h-7 w-7" />
+            <span className="font-display text-2xl font-semibold tracking-tight text-text-primary">
+              {t('app.title')}
+            </span>
+          </h1>
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -155,7 +160,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
               onKeyDown={onTabKeyDown}
               className={`border-b-2 px-4 py-2.5 text-sm font-medium transition ${
                 tab === id
-                  ? 'border-green text-text-primary'
+                  ? 'border-accent text-text-primary'
                   : 'border-transparent text-text-secondary hover:text-text-primary'
               }`}
             >

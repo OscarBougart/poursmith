@@ -66,14 +66,14 @@ export default function RecipeSummary({ library, settings }: RecipeSummaryProps)
       className="mb-5 rounded-xl border border-border bg-bg-card/50 px-4 py-3.5"
     >
       <div className="flex h-2 gap-0.5 overflow-hidden rounded-full bg-bg-elevated" aria-hidden="true">
-        {SEGMENTS.map((flag) => {
+        {SEGMENTS.map((flag, i) => {
           const n = stats.counts[flag];
           if (n === 0) return null;
           return (
             <span
               key={flag}
-              className={`${FLAG_DOT[flag]} first:rounded-l-full last:rounded-r-full`}
-              style={{ width: `${(n / stats.total) * 100}%` }}
+              className={`meter-segment ${FLAG_DOT[flag]} first:rounded-l-full last:rounded-r-full`}
+              style={{ width: `${(n / stats.total) * 100}%`, animationDelay: `${i * 90}ms` }}
             />
           );
         })}

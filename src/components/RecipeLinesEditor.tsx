@@ -90,7 +90,7 @@ export default function RecipeLinesEditor({
                 value={line.unit}
                 onChange={(e) => onUpdate(line.key, { unit: e.target.value as RecipeUnit })}
                 aria-label={t('ingredient.unit')}
-                className="w-24 rounded-lg border border-border bg-bg-primary px-2 py-2 text-text-primary outline-none focus:border-green"
+                className="w-24 rounded-lg border border-border bg-bg-primary px-2 py-2 text-text-primary outline-none focus:border-accent"
               >
                 {RECIPE_UNITS.map((u) => (
                   <option key={u} value={u}>
@@ -103,7 +103,7 @@ export default function RecipeLinesEditor({
                   type="checkbox"
                   checked={line.is_garnish}
                   onChange={(e) => onUpdate(line.key, { is_garnish: e.target.checked })}
-                  className="accent-green"
+                  className="accent-accent"
                 />
                 {t('recipe.garnish')}
               </label>

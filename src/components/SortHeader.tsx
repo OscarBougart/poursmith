@@ -27,7 +27,7 @@ export default function SortHeader<K extends string>({
         type="button"
         onClick={() => onToggle(columnKey)}
         className={`inline-flex items-center gap-1 uppercase tracking-wide transition hover:text-text-primary ${
-          active ? 'text-green' : ''
+          active ? 'text-accent' : ''
         }`}
       >
         {label}

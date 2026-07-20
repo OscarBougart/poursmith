@@ -17,7 +17,7 @@ export interface BatchSheetDialogProps {
 type Mode = 'serves' | 'volume';
 
 const INPUT_CLASS =
-  'w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-text-primary outline-none focus:border-green';
+  'w-full rounded-lg border border-border bg-bg-primary px-3 py-2 text-text-primary outline-none focus:border-accent';
 
 export default function BatchSheetDialog({
   recipe,
@@ -64,7 +64,7 @@ export default function BatchSheetDialog({
             aria-pressed={mode === m}
             className={`rounded-lg border px-3 py-2 text-sm transition ${
               mode === m
-                ? 'border-green bg-green/15 text-text-primary'
+                ? 'border-accent bg-accent/15 text-text-primary'
                 : 'border-border text-text-secondary hover:bg-bg-elevated'
             }`}
           >
