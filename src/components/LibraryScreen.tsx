@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { ReactElement } from 'react';
+import { useRef, useState } from 'react';
+import type { KeyboardEvent, ReactElement } from 'react';
 import type { Locale, Menu, Recipe, Settings } from '@/data/types';
 import { useLibrary } from '@/hooks/useLibrary';
 import { usePersistentState } from '@/hooks/usePersistentState';
@@ -81,6 +81,23 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
     { id: 'menus', label: t('nav.menus') },
   ];
 
+  // Roving-tabindex keyboard nav for the tablist (WAI-ARIA tabs pattern).
+  const tabRefs = useRef(new Map<Tab, HTMLButtonElement>());
+  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>): void {
+    const index = tabs.findIndex((x) => x.id === tab);
+    let next = -1;
+    if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+    else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = tabs.length - 1;
+    else return;
+    const nextTab = tabs[next];
+    if (!nextTab) return;
+    event.preventDefault();
+    setTab(nextTab.id);
+    tabRefs.current.get(nextTab.id)?.focus();
+  }
+
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
       <DemoBanner />
@@ -120,14 +137,22 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
             </button>
           </div>
         </div>
-        <nav aria-label={t('app.title')} className="mx-auto flex max-w-5xl gap-1 px-4">
+        <div role="tablist" aria-label={t('app.title')} className="mx-auto flex max-w-5xl gap-1 px-4">
           {tabs.map(({ id, label }) => (
             <button
               key={id}
+              ref={(el) => {
+                if (el) tabRefs.current.set(id, el);
+                else tabRefs.current.delete(id);
+              }}
               type="button"
-              onClick={() => setTab(id)}
-              aria-selected={tab === id}
               role="tab"
+              id={`tab-${id}`}
+              aria-selected={tab === id}
+              aria-controls={`panel-${id}`}
+              tabIndex={tab === id ? 0 : -1}
+              onClick={() => setTab(id)}
+              onKeyDown={onTabKeyDown}
               className={`border-b-2 px-4 py-2.5 text-sm font-medium transition ${
                 tab === id
                   ? 'border-green text-text-primary'
@@ -137,10 +162,16 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
               {label}
             </button>
           ))}
-        </nav>
+        </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6 print:hidden">
+      <main
+        id={`panel-${tab}`}
+        role="tabpanel"
+        aria-labelledby={`tab-${tab}`}
+        tabIndex={0}
+        className="mx-auto max-w-5xl px-4 py-6 print:hidden focus:outline-none"
+      >
         {error !== null && !errorDismissed && (
           <Banner
             kind="error"
