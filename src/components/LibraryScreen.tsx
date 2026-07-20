@@ -12,11 +12,13 @@ import { useLocale, useT } from '@/i18n';
 import Banner from '@/components/Banner';
 import BatchSheetDialog from '@/components/BatchSheetDialog';
 import CsvImportDialog from '@/components/CsvImportDialog';
+import DemoBanner from '@/components/DemoBanner';
 import GuestMenuView from '@/components/GuestMenuView';
 import IngredientsTab from '@/components/IngredientsTab';
 import InternalMenuView from '@/components/InternalMenuView';
 import MenusTab from '@/components/MenusTab';
 import PrepsTab from '@/components/PrepsTab';
+import RecipeSummary from '@/components/RecipeSummary';
 import RecipesTab from '@/components/RecipesTab';
 import SettingsDialog from '@/components/SettingsDialog';
 import { useToast } from '@/components/Toast';
@@ -81,6 +83,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
+      <DemoBanner />
       <header className="border-b border-border print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
           <h1 className="text-xl font-semibold tracking-tight">{t('app.title')}</h1>
@@ -166,7 +169,9 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
             onDelete={deletePrep}
           />
         ) : tab === 'recipes' ? (
-          <RecipesTab
+          <>
+            <RecipeSummary library={library} settings={settings} />
+            <RecipesTab
             library={library}
             settings={settings}
             onAdd={addRecipe}
@@ -175,6 +180,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
             onDuplicate={duplicateRecipe}
             onOpenBatch={setBatchRecipe}
           />
+          </>
         ) : (
           <MenusTab
             library={library}

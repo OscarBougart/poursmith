@@ -170,4 +170,14 @@ export const en: Record<keyof typeof de, string> = {
   'validation.wasteRange': 'Must be between 0 and 99.9.',
   'validation.nameTaken': 'Name already exists.',
   'validation.vat': 'VAT must be 19, 7 or 0.',
+
+  'demo.title': 'Live demo',
+  'demo.body':
+    'This bar is yours to explore — add, edit and price freely. Every visitor gets a fresh copy.',
+  'summary.label': 'Profitability at a glance',
+  'summary.count': '{priced}/{total} priced',
+  'summary.avgCost': 'avg cost {pct}',
+  'summary.attention': '{n} need attention',
+  'summary.allHealthy': 'all healthy',
+  'summary.bestMargin': 'best margin {value}',
 };

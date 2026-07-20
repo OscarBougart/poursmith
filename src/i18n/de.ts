@@ -168,4 +168,14 @@ export const de = {
   'validation.wasteRange': 'Muss zwischen 0 und 99,9 liegen.',
   'validation.nameTaken': 'Name existiert bereits.',
   'validation.vat': 'MwSt. muss 19, 7 oder 0 sein.',
+
+  'demo.title': 'Live-Demo',
+  'demo.body':
+    'Diese Bar gehört dir — Zutaten, Rezepte und Preise frei bearbeiten. Jeder Besucher bekommt eine eigene Kopie.',
+  'summary.label': 'Profitabilität auf einen Blick',
+  'summary.count': '{priced}/{total} kalkuliert',
+  'summary.avgCost': 'Ø Wareneinsatz {pct}',
+  'summary.attention': '{n} kritisch',
+  'summary.allHealthy': 'alles im grünen Bereich',
+  'summary.bestMargin': 'beste Marge {value}',
 } as const;
