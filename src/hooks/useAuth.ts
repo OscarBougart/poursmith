@@ -15,29 +15,34 @@ export function useAuth(): UseAuthResult {
 
   useEffect(() => {
     let cancelled = false;
-    supabase.auth
-      .getSession()
-      .then(async ({ data }) => {
-        if (cancelled) return;
-        if (data.session) {
-          setSession(data.session);
-          return;
+
+    (async () => {
+      try {
+        let next = (await supabase.auth.getSession()).data.session;
+        if (!next) {
+          // No session: sign the visitor in anonymously so the demo "just works"
+          // without a login screen.
+          const { data, error } = await supabase.auth.signInAnonymously();
+          if (!error) {
+            // Seed this visitor's personal demo library, then adopt the session.
+            // Both must finish BEFORE we mark ready, or the library screen mounts
+            // and fetches before the seed rows exist and shows empty.
+            await supabase.rpc('seed_demo_data');
+            next = data.session;
+          }
         }
-        // No session: sign the visitor in anonymously so the demo "just works"
-        // without a login screen. onAuthStateChange delivers the new session.
-        const { error } = await supabase.auth.signInAnonymously();
-        // Seed a personal demo library for this visitor (idempotent server-side).
-        if (!error) await supabase.rpc('seed_demo_data');
-      })
-      .catch(() => {
-        // treat a failed session lookup as signed-out rather than hanging
-      })
-      .finally(() => {
+        if (!cancelled) setSession(next);
+      } catch {
+        // treat a failed bootstrap as signed-out rather than hanging
+      } finally {
         if (!cancelled) setReady(true);
-      });
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, next) => {
-      setSession(next);
-      setReady(true);
+      }
+    })();
+
+    // Keep the session fresh on later auth changes (sign out, token refresh).
+    // Does not touch `ready` — the bootstrap above owns first paint.
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, current) => {
+      if (!cancelled) setSession(current);
     });
     return () => {
       cancelled = true;
