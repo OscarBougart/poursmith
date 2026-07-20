@@ -25,7 +25,9 @@ export function useAuth(): UseAuthResult {
         }
         // No session: sign the visitor in anonymously so the demo "just works"
         // without a login screen. onAuthStateChange delivers the new session.
-        await supabase.auth.signInAnonymously();
+        const { error } = await supabase.auth.signInAnonymously();
+        // Seed a personal demo library for this visitor (idempotent server-side).
+        if (!error) await supabase.rpc('seed_demo_data');
       })
       .catch(() => {
         // treat a failed session lookup as signed-out rather than hanging
