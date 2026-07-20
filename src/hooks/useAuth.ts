@@ -23,14 +23,14 @@ export function useAuth(): UseAuthResult {
           // No session: sign the visitor in anonymously so the demo "just works"
           // without a login screen.
           const { data, error } = await supabase.auth.signInAnonymously();
-          if (!error) {
-            // Seed this visitor's personal demo library, then adopt the session.
-            // Both must finish BEFORE we mark ready, or the library screen mounts
-            // and fetches before the seed rows exist and shows empty.
-            await supabase.rpc('seed_demo_data');
-            next = data.session;
-          }
+          if (!error) next = data.session;
         }
+        // Ensure any anonymous visitor has a demo library — not just first-time
+        // sign-ins. seed_demo_data is idempotent (it early-returns when the user
+        // already has data), so this also self-heals sessions left empty by an
+        // earlier failed seed. Must finish BEFORE ready, or the library screen
+        // mounts and fetches before the rows exist and shows empty.
+        if (next?.user.is_anonymous) await supabase.rpc('seed_demo_data');
         if (!cancelled) setSession(next);
       } catch {
         // treat a failed bootstrap as signed-out rather than hanging
