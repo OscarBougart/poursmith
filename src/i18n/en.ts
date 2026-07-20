@@ -173,7 +173,7 @@ export const en: Record<keyof typeof de, string> = {
 
   'demo.title': 'Live demo',
   'demo.body':
-    'This bar is yours to explore — add, edit and price freely. Every visitor gets a fresh copy.',
+    'This bar is yours to explore. Add, edit and price freely; every visitor gets a fresh copy.',
   'summary.label': 'Profitability at a glance',
   'summary.count': '{priced}/{total} priced',
   'summary.avgCost': 'avg cost {pct}',

@@ -1,32 +1,68 @@
-# React + TypeScript + Vite
+# PourSmith
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+**A pour-cost and margin engine for bars.** Cost every cocktail to the cent — spirits, house-made preps, German VAT and waste included — and see at a glance which drinks make money and which bleed it.
 
-Currently, two official plugins are available:
+🔗 **Live demo: [poursmith.vercel.app](https://poursmith.vercel.app)** — opens straight into a personal, editable sandbox seeded with a full bar. No sign-up.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+![PourSmith](./public/og.png)
 
-## React Compiler
+## What it does
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Ingredient library** — purchase price, pack size, VAT rate (19 % / 7 % / 0 %) and waste %, with net unit cost derived automatically.
+- **House preps** — syrups, cordials, infusions and batches with their own yield. Preps can nest inside other preps; cost flows through recursively (with cycle protection).
+- **Recipe costing** — build a drink from ingredients and preps and get its pour cost, cost %, net margin and a suggested price hitting your target, all live as you edit.
+- **Profitability at a glance** — a red/amber/green health meter over the whole recipe book, so a menu's weak spots are visible before the detail table.
+- **Menus** — group drinks into menus and export a print-ready guest card (names, descriptions, prices) or an internal sheet (costs and margins), plus CSV.
+- **Bilingual DE / EN** — every user-facing string flows through an i18n lookup; German and English are first-class, with locale-aware EUR and percentage formatting.
 
-## Expanding the Oxlint configuration
+## Tech stack
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+| Layer | Choice |
+|-------|--------|
+| Build | Vite 8 |
+| UI | React 19 + TypeScript (strict, no `any`) |
+| Styling | Tailwind CSS 4 with a tokenized palette (`dram-tokens.css`) |
+| Backend | Supabase (Postgres + Row Level Security + anonymous auth) |
+| Tests | Vitest (92 tests over the costing, pricing and parsing logic) |
+| Hosting | Vercel |
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Architecture notes
+
+**The costing core is pure and tested.** All money math lives in framework-free modules under `src/lib` (`cost.ts`, `recipeCost.ts`, `pricing.ts`, `menuAnalytics.ts`) and is covered by unit tests. VAT handling, waste inflation, recursive prep resolution and the RAG thresholds are one source of truth shared by the on-screen tables, the CSV export and the print views.
+
+**Per-user isolation via RLS.** Every row is scoped to `auth.uid()`; Postgres Row Level Security policies enforce it at the database, not just the client.
+
+**Zero-friction demo.** Visitors are signed in anonymously and get their own seeded copy of the library via an idempotent `seed_demo_data()` Postgres function — so the demo "just works" while every visitor stays isolated and can edit freely. See `supabase/seed-demo-function.sql`.
+
+**Caching-friendly bundle.** React and `@supabase/supabase-js` are split into their own vendor chunks, so app-code edits only invalidate the small (~25 KB gzipped) application chunk on repeat visits.
+
+## Local development
+
+```bash
+npm install
+npm run dev        # start the dev server
+npm test           # run the Vitest suite
+npm run build      # type-check + production build
+npm run lint       # oxlint
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Create a `.env` with your Supabase project:
+
+```
+VITE_SUPABASE_URL=your-project-url
+VITE_SUPABASE_ANON_KEY=your-publishable-anon-key
+```
+
+Then run the SQL in `supabase/` in order: `schema.sql`, `schema-epic2.sql`, `schema-epic3.sql`, `schema-rpc.sql`, then `seed-demo-function.sql` to enable the per-visitor demo seeding.
+
+## Project layout
+
+```
+src/
+  components/   UI: tabs, forms, tables, print views, the profitability meter
+  hooks/        useAuth, useLibrary, useSettings, usePersistentState, …
+  lib/          pure costing/pricing/analytics logic (framework-free, tested)
+  i18n/         DE/EN message catalogs + locale context
+  data/         shared types
+supabase/       schema, RLS policies, seed data, demo-seeding function
+```

@@ -171,7 +171,7 @@ export const de = {
 
   'demo.title': 'Live-Demo',
   'demo.body':
-    'Diese Bar gehört dir — Zutaten, Rezepte und Preise frei bearbeiten. Jeder Besucher bekommt eine eigene Kopie.',
+    'Diese Bar gehört dir: Zutaten, Rezepte und Preise frei bearbeiten. Jeder Besucher bekommt eine eigene Kopie.',
   'summary.label': 'Profitabilität auf einen Blick',
   'summary.count': '{priced}/{total} kalkuliert',
   'summary.avgCost': 'Ø Wareneinsatz {pct}',
