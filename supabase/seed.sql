@@ -40,7 +40,9 @@ begin
     (owner, 'Zitronen',                 'produce', 1, 'piece', 0.59, 0.07, 0),
     (owner, 'Ingwer',                   'produce', 1000, 'g', 4.99, 0.07, 15),
     (owner, 'Minze (Bund)',             'produce', 1, 'piece', 1.29, 0.07, 10),
-    (owner, 'Eier (10er)',              'produce', 10, 'piece', 3.49, 0.07, 0);
+    (owner, 'Eier (10er)',              'produce', 10, 'piece', 3.49, 0.07, 0)
+    ;
+    
 
   insert into public.preps (user_id, name, yield_amount, yield_unit, notes)
     values (owner, 'Simple Syrup 1:1', 1300, 'ml', 'Zucker + Wasser 1:1')

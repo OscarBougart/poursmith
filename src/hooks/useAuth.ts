@@ -17,8 +17,15 @@ export function useAuth(): UseAuthResult {
     let cancelled = false;
     supabase.auth
       .getSession()
-      .then(({ data }) => {
-        if (!cancelled) setSession(data.session);
+      .then(async ({ data }) => {
+        if (cancelled) return;
+        if (data.session) {
+          setSession(data.session);
+          return;
+        }
+        // No session: sign the visitor in anonymously so the demo "just works"
+        // without a login screen. onAuthStateChange delivers the new session.
+        await supabase.auth.signInAnonymously();
       })
       .catch(() => {
         // treat a failed session lookup as signed-out rather than hanging
