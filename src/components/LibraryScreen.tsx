@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactElement } from 'react';
 import type { Locale, Menu, Recipe, Settings } from '@/data/types';
 import { useLibrary } from '@/hooks/useLibrary';
@@ -83,6 +83,26 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
 
   // Roving-tabindex keyboard nav for the tablist (WAI-ARIA tabs pattern).
   const tabRefs = useRef(new Map<Tab, HTMLButtonElement>());
+
+  // A single underline that slides between tabs. We measure the active button's
+  // box and drive one indicator's transform/width, rather than toggling a border
+  // per tab. `ready` gates the transition on so it doesn't animate from 0 on load.
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const [indicatorReady, setIndicatorReady] = useState(false);
+  useLayoutEffect(() => {
+    const el = tabRefs.current.get(tab);
+    if (el) setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
+  }, [tab, locale]);
+  useEffect(() => {
+    setIndicatorReady(true);
+    function measure(): void {
+      const el = tabRefs.current.get(tab);
+      if (el) setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
+    }
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [tab]);
+
   function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>): void {
     const index = tabs.findIndex((x) => x.id === tab);
     let next = -1;
@@ -142,7 +162,7 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
             </button>
           </div>
         </div>
-        <div role="tablist" aria-label={t('app.title')} className="mx-auto flex max-w-5xl gap-1 px-4">
+        <div role="tablist" aria-label={t('app.title')} className="relative mx-auto flex max-w-5xl gap-1 px-4">
           {tabs.map(({ id, label }) => (
             <button
               key={id}
@@ -158,15 +178,20 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
               tabIndex={tab === id ? 0 : -1}
               onClick={() => setTab(id)}
               onKeyDown={onTabKeyDown}
-              className={`border-b-2 px-4 py-2.5 text-sm font-medium transition ${
-                tab === id
-                  ? 'border-accent text-text-primary'
-                  : 'border-transparent text-text-secondary hover:text-text-primary'
+              className={`px-4 py-2.5 text-sm font-medium transition-colors ${
+                tab === id ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               {label}
             </button>
           ))}
+          <span
+            aria-hidden="true"
+            className={`pointer-events-none absolute bottom-0 left-0 h-0.5 rounded-full bg-accent ${
+              indicatorReady ? 'transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]' : ''
+            }`}
+            style={{ width: indicator.width, transform: `translateX(${indicator.left}px)` }}
+          />
         </div>
       </header>
 
