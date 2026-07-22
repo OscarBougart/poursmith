@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { useT } from '@/i18n';
+import { ICON_BUTTON } from '@/components/buttonStyles';
 
 export interface BannerProps {
   kind: 'error' | 'success';
@@ -11,7 +12,7 @@ export default function Banner({ kind, message, onDismiss }: BannerProps): React
   const t = useT();
   const tone =
     kind === 'error'
-      ? 'border-margin-bad/40 bg-margin-bad/10 text-red-200'
+      ? 'border-margin-bad/40 bg-margin-bad/10 text-margin-bad'
       : 'border-margin-good/40 bg-margin-good/10 text-margin-good';
   return (
     <div
@@ -23,7 +24,7 @@ export default function Banner({ kind, message, onDismiss }: BannerProps): React
         type="button"
         onClick={onDismiss}
         aria-label={t('common.close')}
-        className="shrink-0 rounded p-0.5 leading-none opacity-70 transition hover:opacity-100"
+        className={`${ICON_BUTTON} shrink-0`}
       >
         ×
       </button>

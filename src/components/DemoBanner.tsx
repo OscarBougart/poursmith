@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { useT } from '@/i18n';
+import { ICON_BUTTON } from '@/components/buttonStyles';
 
 const isBool = (v: unknown): v is boolean => typeof v === 'boolean';
 
@@ -28,7 +29,7 @@ export default function DemoBanner(): ReactElement | null {
           type="button"
           onClick={() => setDismissed(true)}
           aria-label={t('common.close')}
-          className="ml-auto shrink-0 rounded p-0.5 leading-none text-text-secondary opacity-70 transition hover:opacity-100"
+          className={`${ICON_BUTTON} ml-auto shrink-0`}
         >
           ×
         </button>
