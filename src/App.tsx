@@ -7,7 +7,7 @@ import { ToastProvider } from '@/components/Toast';
 
 function AuthGate(): ReactElement {
   const t = useT();
-  const { session, ready, signIn, signOut } = useAuth();
+  const { session, ready, signIn, linkAccount, signOut } = useAuth();
 
   if (!ready) {
     return (
@@ -16,7 +16,16 @@ function AuthGate(): ReactElement {
       </main>
     );
   }
-  return session ? <LibraryScreen onSignOut={signOut} /> : <LoginScreen onSignIn={signIn} />;
+  return session ? (
+    <LibraryScreen
+      session={session}
+      onSignIn={signIn}
+      onLink={linkAccount}
+      onSignOut={signOut}
+    />
+  ) : (
+    <LoginScreen onSignIn={signIn} />
+  );
 }
 
 export default function App(): ReactElement {

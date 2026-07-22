@@ -178,4 +178,15 @@ export const de = {
   'summary.attention': '{n} kritisch',
   'summary.allHealthy': 'alles im grünen Bereich',
   'summary.bestMargin': 'beste Marge {value}',
+
+  'account.save': 'Bar speichern',
+  'account.saveTitle': 'Bar speichern',
+  'account.saveBody':
+    'Lege einen Login an, damit deine Bar erhalten bleibt und sich auf jedem Gerät öffnet.',
+  'account.create': 'Bar speichern',
+  'account.signInTitle': 'Anmelden',
+  'account.signInBody': 'Öffne eine zuvor gespeicherte Bar.',
+  'account.toSignIn': 'Schon gespeichert? Anmelden',
+  'account.toSave': 'Bar speichern? Login anlegen',
+  'account.saved': 'Bar gespeichert unter {email}',
 } as const;

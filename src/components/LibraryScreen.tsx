@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactElement } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import type { Locale, Menu, Recipe, Settings } from '@/data/types';
 import { useLibrary } from '@/hooks/useLibrary';
 import { usePersistentState } from '@/hooks/usePersistentState';
@@ -12,6 +13,7 @@ import { useLocale, useT } from '@/i18n';
 import Banner from '@/components/Banner';
 import BatchSheetDialog from '@/components/BatchSheetDialog';
 import CsvImportDialog from '@/components/CsvImportDialog';
+import AccountDialog from '@/components/AccountDialog';
 import DemoBanner from '@/components/DemoBanner';
 import GuestMenuView from '@/components/GuestMenuView';
 import IngredientsTab from '@/components/IngredientsTab';
@@ -24,15 +26,26 @@ import SettingsDialog from '@/components/SettingsDialog';
 import { useToast } from '@/components/Toast';
 
 export interface LibraryScreenProps {
+  session: Session;
+  onSignIn: (email: string, password: string) => Promise<string | null>;
+  onLink: (email: string, password: string) => Promise<string | null>;
   onSignOut: () => Promise<void>;
 }
 
 type Tab = 'ingredients' | 'preps' | 'recipes' | 'menus';
 const LOCALES: Locale[] = ['de', 'en'];
 
-export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactElement {
+export default function LibraryScreen({
+  session,
+  onSignIn,
+  onLink,
+  onSignOut,
+}: LibraryScreenProps): ReactElement {
   const t = useT();
   const { locale, setLocale } = useLocale();
+  const isAnonymous = session.user.is_anonymous === true;
+  const email = session.user.email ?? null;
+  const [accountOpen, setAccountOpen] = useState(false);
   const {
     library,
     loading,
@@ -153,13 +166,30 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={() => void onSignOut()}
-              className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary transition hover:bg-bg-elevated"
-            >
-              {t('auth.signOut')}
-            </button>
+            {isAnonymous ? (
+              <button
+                type="button"
+                onClick={() => setAccountOpen(true)}
+                className="rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white transition hover:bg-accent-d1"
+              >
+                {t('account.save')}
+              </button>
+            ) : (
+              <>
+                {email !== null && (
+                  <span className="hidden text-sm text-text-secondary sm:inline" title={email}>
+                    {email}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => void onSignOut()}
+                  className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary transition hover:bg-bg-elevated"
+                >
+                  {t('auth.signOut')}
+                </button>
+              </>
+            )}
           </div>
         </div>
         <div role="tablist" aria-label={t('app.title')} className="relative mx-auto flex max-w-5xl gap-1 px-4">
@@ -274,6 +304,15 @@ export default function LibraryScreen({ onSignOut }: LibraryScreenProps): ReactE
         library={library}
         onClose={() => setBatchRecipe(null)}
       />
+      {accountOpen && (
+        <AccountDialog
+          initialMode="save"
+          onLink={onLink}
+          onSignIn={onSignIn}
+          onSaved={(savedEmail) => push(t('account.saved', { email: savedEmail }))}
+          onClose={() => setAccountOpen(false)}
+        />
+      )}
       {settingsOpen && (
         <SettingsDialog
           key={targetCostPct}

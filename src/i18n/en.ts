@@ -180,4 +180,14 @@ export const en: Record<keyof typeof de, string> = {
   'summary.attention': '{n} need attention',
   'summary.allHealthy': 'all healthy',
   'summary.bestMargin': 'best margin {value}',
+
+  'account.save': 'Save my bar',
+  'account.saveTitle': 'Save your bar',
+  'account.saveBody': 'Create a login so your bar is kept and opens on any device.',
+  'account.create': 'Save bar',
+  'account.signInTitle': 'Sign in',
+  'account.signInBody': 'Open a bar you saved earlier.',
+  'account.toSignIn': 'Already saved a bar? Sign in',
+  'account.toSave': 'Need to save your bar? Create a login',
+  'account.saved': 'Bar saved to {email}',
 };

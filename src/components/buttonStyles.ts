@@ -3,7 +3,7 @@
 // index.css; the ring here reinforces it on the coloured controls.
 
 export const PRIMARY_BUTTON =
-  'rounded-lg bg-green px-4 py-2 text-sm font-medium text-bg-primary transition hover:bg-green-d1 disabled:opacity-60';
+  'rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-accent-d1 disabled:opacity-60';
 
 export const SECONDARY_BUTTON =
   'rounded-lg border border-border px-4 py-2 text-sm text-text-secondary transition hover:bg-bg-elevated';

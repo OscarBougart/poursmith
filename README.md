@@ -1,5 +1,7 @@
 # PourSmith
 
+[![CI](https://github.com/OscarBougart/poursmith/actions/workflows/ci.yml/badge.svg)](https://github.com/OscarBougart/poursmith/actions/workflows/ci.yml)
+
 **A pour-cost and margin engine for bars.** Cost every cocktail to the cent — spirits, house-made preps, German VAT and waste included — and see at a glance which drinks make money and which bleed it.
 
 🔗 **Live demo: [poursmith.vercel.app](https://poursmith.vercel.app)** — opens straight into a personal, editable sandbox seeded with a full bar. No sign-up.

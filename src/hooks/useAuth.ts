@@ -6,6 +6,9 @@ export interface UseAuthResult {
   session: Session | null;
   ready: boolean;
   signIn: (email: string, password: string) => Promise<string | null>;
+  /** Upgrade the current anonymous user to a permanent email/password account,
+   *  keeping their existing data. Returns an error message or null on success. */
+  linkAccount: (email: string, password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
 }
 
@@ -55,9 +58,17 @@ export function useAuth(): UseAuthResult {
     return error ? error.message : null;
   }, []);
 
+  const linkAccount = useCallback(async (email: string, password: string) => {
+    // updateUser on an anonymous user attaches an email + password identity to
+    // the SAME user id, so all their rows carry over. onAuthStateChange delivers
+    // the refreshed session (is_anonymous flips false once the email is applied).
+    const { error } = await supabase.auth.updateUser({ email, password });
+    return error ? error.message : null;
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
   }, []);
 
-  return { session, ready, signIn, signOut };
+  return { session, ready, signIn, linkAccount, signOut };
 }
