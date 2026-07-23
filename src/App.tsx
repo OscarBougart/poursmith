@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { LocaleProvider, useT } from '@/i18n';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import LibraryScreen from '@/components/LibraryScreen';
 import LoginScreen from '@/components/LoginScreen';
 import { ToastProvider } from '@/components/Toast';
@@ -30,10 +31,12 @@ function AuthGate(): ReactElement {
 
 export default function App(): ReactElement {
   return (
-    <LocaleProvider>
-      <ToastProvider>
-        <AuthGate />
-      </ToastProvider>
-    </LocaleProvider>
+    <ErrorBoundary>
+      <LocaleProvider>
+        <ToastProvider>
+          <AuthGate />
+        </ToastProvider>
+      </LocaleProvider>
+    </ErrorBoundary>
   );
 }
