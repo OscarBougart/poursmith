@@ -80,6 +80,72 @@ textarea:focus-visible {
   }
 }
 
+/* Responsive data tables → stacked cards on phones (< md / 768px). Each row
+   becomes a card; every cell shows its column label (from data-label) beside the
+   value. Sortable headers drop on mobile (search still filters). Desktop is the
+   normal table, untouched. Mark cells: .card-title (the name/header row),
+   .card-actions (button rows), .card-hidden (drop on mobile). */
+@media (max-width: 767px) {
+  .table-cards thead {
+    display: none;
+  }
+  .table-cards,
+  .table-cards tbody,
+  .table-cards tr,
+  .table-cards td {
+    display: block;
+  }
+  .table-cards tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+  .table-cards tbody tr {
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: color-mix(in oklab, var(--color-bg-card) 45%, transparent);
+    padding: 0.25rem 0;
+  }
+  .table-cards td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0.9rem;
+    text-align: right;
+  }
+  .table-cards td[data-label]::before {
+    content: attr(data-label);
+    flex: none;
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+  }
+  .table-cards td.card-title {
+    justify-content: flex-start;
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 0.25rem;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+  }
+  .table-cards td.card-title::before {
+    content: none;
+  }
+  .table-cards td.card-actions {
+    justify-content: flex-end;
+    padding-top: 0.6rem;
+  }
+  .table-cards td.card-actions::before {
+    content: none;
+  }
+  .table-cards td.card-hidden,
+  .table-cards tr.card-hidden {
+    display: none;
+  }
+}
+
 /* Batch sheets / menus print standalone: hide the app, show only .print-area. */
 @media print {
   body {

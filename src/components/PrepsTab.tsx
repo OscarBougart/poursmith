@@ -137,8 +137,8 @@ export default function PrepsTab({
           {t('prep.empty')}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-left text-sm">
+        <div className="md:overflow-x-auto md:rounded-xl md:border md:border-border">
+          <table className="table-cards w-full text-left text-sm">
             <thead className="bg-bg-card text-xs uppercase tracking-wide text-text-secondary">
               <tr>
                 <th className="w-10 px-2 py-3" />
@@ -155,7 +155,7 @@ export default function PrepsTab({
                 return (
                   <Fragment key={prep.id}>
                     <tr className="bg-bg-card/40 transition hover:bg-bg-elevated">
-                      <td className="px-2 py-3">
+                      <td className="card-hidden px-2 py-3">
                         <button
                           type="button"
                           onClick={() => toggleExpanded(prep.id)}
@@ -166,7 +166,7 @@ export default function PrepsTab({
                           {isOpen ? '▾' : '▸'}
                         </button>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="card-title px-4 py-3">
                         <button
                           type="button"
                           onClick={() => setEditing({ mode: 'edit', prep })}
@@ -175,23 +175,25 @@ export default function PrepsTab({
                           {prep.name}
                         </button>
                       </td>
-                      <td className="px-4 py-3 text-text-secondary">
+                      <td className="px-4 py-3 text-text-secondary" data-label={t('prep.yieldAmount')}>
                         {formatNumber(prep.yield_amount, locale)} {t(`unit.${prep.yield_unit}`)}
                       </td>
-                      <td className="px-4 py-3 font-medium text-margin-good">
+                      <td className="px-4 py-3 font-medium text-margin-good" data-label={t('prep.unitCost')}>
                         {unitCost !== null
                           ? formatPerUnit(unitCost, t(`unit.${prep.yield_unit}`), locale)
                           : '—'}
                       </td>
-                      <td className="px-4 py-3 text-text-secondary">
+                      <td className="px-4 py-3 text-text-secondary" data-label={t('prep.batchCost')}>
                         {unitCost !== null
                           ? formatEur(unitCost * prep.yield_amount, locale)
                           : '—'}
                       </td>
-                      <td className="px-4 py-3 text-text-secondary">{lines.length}</td>
+                      <td className="px-4 py-3 text-text-secondary" data-label={t('prep.components')}>
+                        {lines.length}
+                      </td>
                     </tr>
                     {isOpen && (
-                      <tr className="bg-bg-card/60">
+                      <tr className="card-hidden bg-bg-card/60">
                         <td />
                         <td colSpan={5} className="px-4 py-3">
                           <ul className="flex flex-col gap-1 text-sm">

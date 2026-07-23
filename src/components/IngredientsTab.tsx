@@ -123,8 +123,8 @@ export default function IngredientsTab({
           {t('ingredient.empty')}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-left text-sm">
+        <div className="md:overflow-x-auto md:rounded-xl md:border md:border-border">
+          <table className="table-cards w-full text-left text-sm">
             <thead className="bg-bg-card text-xs uppercase tracking-wide text-text-secondary">
               <tr>
                 <SortHeader columnKey="name" sort={sort} onToggle={toggle} label={t('common.name')} />
@@ -142,7 +142,7 @@ export default function IngredientsTab({
                   onClick={() => setEditing({ mode: 'edit', ingredient })}
                   className="cursor-pointer bg-bg-card/40 transition hover:bg-bg-elevated"
                 >
-                  <td className="px-4 py-3">
+                  <td className="card-title px-4 py-3">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -154,15 +154,19 @@ export default function IngredientsTab({
                       {ingredient.name}
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-text-secondary">{t(`category.${ingredient.category}`)}</td>
-                  <td className="px-4 py-3 text-text-secondary">
+                  <td className="px-4 py-3 text-text-secondary" data-label={t('ingredient.category')}>
+                    {t(`category.${ingredient.category}`)}
+                  </td>
+                  <td className="px-4 py-3 text-text-secondary" data-label={t('ingredient.packSize')}>
                     {formatNumber(ingredient.pack_size, locale)} {t(`unit.${ingredient.unit}`)}
                   </td>
-                  <td className="px-4 py-3 text-text-secondary">{formatEur(ingredient.price_net, locale)}</td>
-                  <td className="px-4 py-3 text-text-secondary">
+                  <td className="px-4 py-3 text-text-secondary" data-label={t('ingredient.priceNet')}>
+                    {formatEur(ingredient.price_net, locale)}
+                  </td>
+                  <td className="px-4 py-3 text-text-secondary" data-label={t('ingredient.wastePct')}>
                     {formatNumber(ingredient.waste_pct, locale)} %
                   </td>
-                  <td className="px-4 py-3 font-medium text-margin-good">
+                  <td className="px-4 py-3 font-medium text-margin-good" data-label={t('ingredient.unitCost')}>
                     {formatPerUnit(ingredientUnitCost(ingredient), t(`unit.${ingredient.unit}`), locale)}
                   </td>
                 </tr>

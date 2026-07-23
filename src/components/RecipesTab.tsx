@@ -141,8 +141,8 @@ export default function RecipesTab({
           {t('recipe.empty')}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full text-left text-sm">
+        <div className="md:overflow-x-auto md:rounded-xl md:border md:border-border">
+          <table className="table-cards w-full text-left text-sm">
             <thead className="bg-bg-card text-xs uppercase tracking-wide text-text-secondary">
               <tr>
                 <SortHeader columnKey="name" sort={sort} onToggle={toggle} label={t('common.name')} />
@@ -158,7 +158,7 @@ export default function RecipesTab({
             <tbody className="divide-y divide-border/70">
               {rows.map(({ recipe, pourCost, pct, margin, suggested, flag }) => (
                 <tr key={recipe.id} className="bg-bg-card/40 transition hover:bg-bg-elevated">
-                  <td className="px-4 py-3">
+                  <td className="card-title px-4 py-3">
                     <button
                       type="button"
                       onClick={() => setEditing({ mode: 'edit', recipe })}
@@ -167,23 +167,25 @@ export default function RecipesTab({
                       {recipe.name}
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-text-secondary">{recipe.glass ?? '—'}</td>
-                  <td className="px-4 py-3 text-text-secondary">
+                  <td className="px-4 py-3 text-text-secondary" data-label={t('recipe.glass')}>
+                    {recipe.glass ?? '—'}
+                  </td>
+                  <td className="px-4 py-3 text-text-secondary" data-label={t('recipe.priceGross')}>
                     {recipe.price_gross != null ? formatEur(recipe.price_gross, locale) : '—'}
                   </td>
-                  <td className="px-4 py-3 font-medium text-margin-good">
+                  <td className="px-4 py-3 font-medium text-margin-good" data-label={t('recipe.pourCost')}>
                     {pourCost !== null ? formatEur(pourCost, locale) : '—'}
                   </td>
-                  <td className={`px-4 py-3 font-medium ${FLAG_TEXT[flag]}`}>
+                  <td className={`px-4 py-3 font-medium ${FLAG_TEXT[flag]}`} data-label={t('recipe.costPct')}>
                     {pct !== null ? formatPercent(pct, locale) : '—'}
                   </td>
-                  <td className="px-4 py-3 text-text-secondary">
+                  <td className="px-4 py-3 text-text-secondary" data-label={t('recipe.margin')}>
                     {margin !== null ? formatEur(margin, locale) : '—'}
                   </td>
-                  <td className="px-4 py-3 text-text-primary">
+                  <td className="px-4 py-3 text-text-primary" data-label={t('recipe.suggestedPrice')}>
                     {suggested !== null ? formatEur(suggested, locale) : '—'}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="card-actions px-4 py-3">
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
