@@ -132,7 +132,7 @@ export default function LibraryScreen({
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary text-text-primary">
+    <div className="min-h-screen overflow-x-hidden bg-bg-primary text-text-primary">
       <DemoBanner />
       <header className="border-b border-border print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
@@ -192,7 +192,11 @@ export default function LibraryScreen({
             )}
           </div>
         </div>
-        <div role="tablist" aria-label={t('app.title')} className="relative mx-auto flex max-w-5xl gap-1 px-4">
+        <div
+          role="tablist"
+          aria-label={t('app.title')}
+          className="relative mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {tabs.map(({ id, label }) => (
             <button
               key={id}
@@ -208,7 +212,7 @@ export default function LibraryScreen({
               tabIndex={tab === id ? 0 : -1}
               onClick={() => setTab(id)}
               onKeyDown={onTabKeyDown}
-              className={`px-4 py-2.5 text-sm font-medium transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-4 py-2.5 text-sm font-medium transition-colors ${
                 tab === id ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'
               }`}
             >
