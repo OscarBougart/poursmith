@@ -1,6 +1,7 @@
 # PourSmith
 
 [![CI](https://github.com/OscarBougart/poursmith/actions/workflows/ci.yml/badge.svg)](https://github.com/OscarBougart/poursmith/actions/workflows/ci.yml)
+[![E2E](https://github.com/OscarBougart/poursmith/actions/workflows/e2e.yml/badge.svg)](https://github.com/OscarBougart/poursmith/actions/workflows/e2e.yml)
 
 **A pour-cost and margin engine for bars.** Cost every cocktail to the cent — spirits, house-made preps, German VAT and waste included — and see at a glance which drinks make money and which bleed it.
 
@@ -43,7 +44,8 @@
 ```bash
 npm install
 npm run dev        # start the dev server
-npm test           # run the Vitest suite
+npm test           # unit suite (Vitest) over the costing/pricing logic
+npm run test:e2e   # end-to-end smoke of the demo flow (Playwright)
 npm run build      # type-check + production build
 npm run lint       # oxlint
 ```
